@@ -26,8 +26,9 @@ namespace Spiderly.Shared.Attributes.Entity
     /// }
     /// </code>
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property)]
+    [AttributeUsage(AttributeTargets.Property, AllowMultiple = false)]
     public class CascadeDeleteAttribute : Attribute
     {
+        public CascadeDeleteAttribute() { }
     }
 }

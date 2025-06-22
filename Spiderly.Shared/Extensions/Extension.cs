@@ -63,9 +63,9 @@ namespace Spiderly.Shared.Extensions
         #region Is Type
 
         /// <summary>
-        /// User -> true
-        /// string -> false
-        /// List<User> -> false
+        /// User - true <br/>
+        /// string - false <br/>
+        /// List - false <br/>
         /// </summary>
         public static bool IsManyToOneType(this PropertyInfo property)
         {

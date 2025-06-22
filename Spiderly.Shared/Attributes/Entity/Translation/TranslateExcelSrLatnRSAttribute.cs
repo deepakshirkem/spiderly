@@ -9,7 +9,7 @@ namespace Spiderly.Shared.Attributes.Entity.Translation
     /// <summary>
     /// <b>Usage:</b> Specifies the Serbian Latin name for the exported Excel file. <br/> <br/>
     /// 
-    /// <b>If not specified:</b> <br/>
+    /// <b>Fallback behavior:</b> <br/>
     /// - First tries to use <i>TranslatePluralSrLatnRS</i> value. <br/>
     /// - If <i>TranslatePluralSrLatnRS</i> is not available, uses <i>'YourEntityNameList'</i> <br/> <br/>
     /// 
@@ -23,8 +23,7 @@ namespace Spiderly.Shared.Attributes.Entity.Translation
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class TranslateExcelSrLatnRSAttribute : Attribute
+    public class TranslateExcelSrLatnRSAttribute(string translation) : Attribute
     {
-        public TranslateExcelSrLatnRSAttribute(string translate) { }
     }
 }

@@ -44,7 +44,7 @@ namespace Spiderly.Shared.Extensions
         /// <br/>
         /// This method simplifies service configuration by consolidating related setup logic into one reusable method. <br/>
         /// </summary>
-        public static void SpiderlyConfigureServices<TDbContext>(this IServiceCollection services, string languageTag = "en") where TDbContext : DbContext, IApplicationDbContext
+        public static void SpiderlyConfigureServices<TDbContext>(this IServiceCollection services, string cultureCode = "en") where TDbContext : DbContext, IApplicationDbContext
         {
             services.AddMemoryCache();
 
@@ -58,7 +58,7 @@ namespace Spiderly.Shared.Extensions
 
             services.AddCors();
 
-            services.SpiderlyConfigureCulture(languageTag); // It's mandatory to be before AddControllers
+            services.SpiderlyConfigureCulture(cultureCode); // It's mandatory to be before AddControllers
 
             services.SpiderlyAddControllers();
 
@@ -107,16 +107,16 @@ namespace Spiderly.Shared.Extensions
             });
         }
 
-        public static void SpiderlyConfigureCulture(this IServiceCollection services, string languageTag)
+        public static void SpiderlyConfigureCulture(this IServiceCollection services, string cultureCode)
         {
             services.Configure<RequestLocalizationOptions>(options =>
             {
                 CultureInfo[] supportedCultures = new[]
                 {
-                    new CultureInfo(languageTag)
+                    new CultureInfo(cultureCode)
                 };
 
-                options.DefaultRequestCulture = new RequestCulture(languageTag);
+                options.DefaultRequestCulture = new RequestCulture(cultureCode);
                 options.SupportedCultures = supportedCultures;
                 options.SupportedUICultures = supportedCultures;
             });

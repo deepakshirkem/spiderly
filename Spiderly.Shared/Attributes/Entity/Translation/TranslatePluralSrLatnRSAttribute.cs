@@ -7,10 +7,10 @@ using System.Threading.Tasks;
 namespace Spiderly.Shared.Attributes.Entity.Translation
 {
     /// <summary>
-    /// <b>Usage:</b> Specifies the Serbian Latin plural form translation for a class. <br/> <br/>
+    /// <b>Usage:</b> Specifies the Serbian Latin plural form translation for an entity. <br/> <br/>
     /// 
     /// <b>This translation is used for:</b> <br/>
-    /// - Generates translations for the 'YourClassNameList' key on both the frontend and backend. <br/>
+    /// - Generates translations for the 'YourEntityNameList' key on both the frontend and backend. <br/>
     /// - Table titles (used by default when generating pages with the 'add-new-page' Spiderly command; this can be customized). <br/>
     /// - Excel export filenames (when <i>TranslateExcelSrLatnRS</i> is not specified) <br/>
     /// <br/>
@@ -20,15 +20,12 @@ namespace Spiderly.Shared.Attributes.Entity.Translation
     /// [TranslatePluralSrLatnRS("Korisnički poeni")]
     /// public class UserPoint : BusinessObject&lt;long&gt;
     /// {
-    ///     // Class properties
+    ///     // Entity properties
     /// }
-    /// // Will show as "Korisnički poeni" in table headers
-    /// // Will export as "Korisnički poeni.xlsx" if TranslateExcelSrLatnRS is not specified
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class TranslatePluralSrLatnRSAttribute : Attribute
+    public class TranslatePluralSrLatnRSAttribute(string translation) : Attribute
     {
-        public TranslatePluralSrLatnRSAttribute(string translate) { }
     }
 }

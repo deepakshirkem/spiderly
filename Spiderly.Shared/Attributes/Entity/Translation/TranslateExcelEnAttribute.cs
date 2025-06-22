@@ -9,7 +9,7 @@ namespace Spiderly.Shared.Attributes.Entity.Translation
     /// <summary>
     /// <b>Usage:</b> Specifies the English name for the exported Excel file. <br/> <br/>
     /// 
-    /// <b>If not specified:</b> <br/>
+    /// <b>Fallback behavior:</b> <br/>
     /// - First tries to use <i>TranslatePluralEn</i> value. <br/>
     /// - If <i>TranslatePluralEn</i> is not available, uses <i>'YourEntityNameList'</i>. <br/> <br/>
     /// 
@@ -23,8 +23,7 @@ namespace Spiderly.Shared.Attributes.Entity.Translation
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
-    public class TranslateExcelEnAttribute : Attribute
+    public class TranslateExcelEnAttribute(string translation) : Attribute
     {
-        public TranslateExcelEnAttribute(string translate) { }
     }
 }

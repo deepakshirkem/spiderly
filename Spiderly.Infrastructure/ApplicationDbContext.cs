@@ -31,8 +31,11 @@ namespace Spiderly.Infrastructure
         }
 
         public DbSet<TUser> User { get; set; }
+
         public DbSet<Role> Role { get; set; }
+
         public DbSet<UserRole> UserRole { get; set; } // M2M
+
         public DbSet<Permission> Permission { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

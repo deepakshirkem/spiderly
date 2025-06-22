@@ -7,30 +7,21 @@ using System.Threading.Tasks;
 namespace Spiderly.Shared.Attributes.Entity.Translation
 {
     /// <summary>
-    /// <b>Usage:</b> Specifies the Serbian Latin singular form translation for a class or property. <br/> <br/>
+    /// <b>Usage:</b> Specifies the Serbian Latin form translation for an entity or property. <br/> <br/>
     /// 
-    /// <b>When applied to a class:</b> <br/>
+    /// <b>When applied to the entity class:</b> <br/>
     /// - Generates translations for the 'YourClassName' key on both the frontend and backend. <br/> <br/>
     /// 
-    /// <b>Example:</b>
-    /// <code>
-    /// [TranslateSrLatnRS("Korisnički poen")]
-    /// public class UserPoint : BusinessObject&lt;long&gt;
-    /// {
-    ///     // Class properties
-    /// }
-    /// </code>
-    /// 
-    /// <br/> <br/>
-    /// 
-    /// <b>When applied to a property:</b> <br/>
+    /// <b>When applied to the property:</b> <br/>
     /// - Generates translations for the 'YourPropertyName' key on both the frontend and backend. <br/>
-    /// - Used as the label for an admin form field in the UI. <br/>
-    /// - Used in server validation messages (e.g., <i>Polje 'Email adresa' ne sme biti prazno"</i>). <br/>
+    /// - Used as the default input field label in the generated Angular form component. <br/>
+    /// - Used in both server- and client-side validation messages (e.g., <i>Polje 'Email adresa' ne sme biti prazno"</i>). <br/>
     /// <br/>
+    /// 
     /// <b>Example:</b>
     /// <code>
-    /// public class User : BusinessObject&lt;long&gt;
+    /// [TranslateSrLatnRS("Korisnik")]
+    /// public class UserExtended : BusinessObject&lt;long&gt;
     /// {
     ///     [TranslateSrLatnRS("Email adresa")]
     ///     public string Email { get; set; }
@@ -38,8 +29,7 @@ namespace Spiderly.Shared.Attributes.Entity.Translation
     /// </code>
     /// </summary>
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Property, AllowMultiple = false)]
-    public class TranslateSrLatnRSAttribute : Attribute
+    public class TranslateSrLatnRSAttribute(string translation) : Attribute
     {
-        public TranslateSrLatnRSAttribute(string translate) { }
     }
 }

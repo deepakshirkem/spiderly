@@ -13,6 +13,7 @@
     <Company>Spiderly</Company>
     <ProjectUrl>https://www.spiderly.dev</ProjectUrl>
     <RepositoryUrl>https://github.com/filiptrivan/spiderly</RepositoryUrl>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="Repositories\**" />
