@@ -111,7 +111,10 @@ namespace Spiderly.CLI
 
             string currentPath = Environment.CurrentDirectory;
 
-            string version = assembly.GetName().Version.ToString();
+            string fullVersion = assembly
+                .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
+                .InformationalVersion;
+            string version = fullVersion?.Split('+')[0]; // If we don't split, it will return the full version with the commit hash, which is not needed for the init command.
 
             bool hasNetAndAngularInitErrors = false;
             bool hasEfMigrationErrors = false;

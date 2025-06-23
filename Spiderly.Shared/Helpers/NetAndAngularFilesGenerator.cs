@@ -4,6 +4,7 @@ using CaseConverter;
 using System.Security.Cryptography;
 using Spiderly.Shared.Exceptions;
 using Microsoft.AspNetCore.Routing;
+using System;
 
 namespace Spiderly.Shared.Helpers
 {
@@ -282,7 +283,7 @@ namespace Spiderly.Shared.Helpers
                         {
                             new SpiderlyFile { Name = ".editorconfig", Data = GetEditOrConfigData() },
                             new SpiderlyFile { Name = "angular.json", Data = GetAngularJsonData(appName) },
-                            new SpiderlyFile { Name = "package.json", Data = GetPackageJsonData(appName) },
+                            new SpiderlyFile { Name = "package.json", Data = GetPackageJsonData(appName, version) },
                             new SpiderlyFile { Name = "README.md", Data = "" },
                             new SpiderlyFile { Name = "tsconfig.app.json", Data = GetTsConfigAppJsonData() },
                             new SpiderlyFile { Name = "tsconfig.json", Data = GetTsConfigJsonData(isFromNuget) },
@@ -3846,7 +3847,7 @@ namespace {{appName}}.Business.DataMappers
 """;
         }
 
-        private static string GetPackageJsonData(string appName)
+        private static string GetPackageJsonData(string appName, string version)
         {
             return $$"""
 {
@@ -3863,7 +3864,7 @@ namespace {{appName}}.Business.DataMappers
     },
     "private": true,
     "dependencies": {
-        "spiderly": "latest",
+        "spiderly": "{{version}}",
         "@abacritt/angularx-social-login": "2.2.0",
         "@angular/animations": "19.2.13",
         "@angular/common": "19.2.13",

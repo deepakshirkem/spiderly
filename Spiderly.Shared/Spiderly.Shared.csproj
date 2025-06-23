@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Version>19.0.9</Version>
+    <Version>19.1.0</Version>
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <NoWarn>NU1701</NoWarn>
+    <NoWarn>NU1701;1591</NoWarn>
     <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageIcon>spiderly-logo.png</PackageIcon>
     <Authors>Filip Trivan</Authors>
