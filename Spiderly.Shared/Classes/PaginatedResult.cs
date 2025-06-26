@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Spiderly.Shared.DTO
+namespace Spiderly.Shared.Classes
 {
-    public class TableResponseDTO<T> where T : class
+    public class PaginatedResult<T> where T : class
     {
-        public IList<T> Data { get; set; }
+        public IQueryable<T> Query { get; set; }
         public int TotalRecords { get; set; }
     }
 }

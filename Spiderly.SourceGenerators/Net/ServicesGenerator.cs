@@ -200,26 +200,26 @@ namespace {{basePartOfNamespace}}.Services
             });
         }
 
-        public async Task<PaginationResult<{{entity.Name}}>> Get{{entity.Name}}ListForPagination(TableFilterDTO tableFilterPayload, IQueryable<{{entity.Name}}> query)
+        public async Task<PaginatedResult<{{entity.Name}}>> GetPaginated{{entity.Name}}List(FilterDTO filterDTO, IQueryable<{{entity.Name}}> query)
         {
             return await _context.WithTransactionAsync(async () =>
             {
-                return await TableFilterQueryable.Build(query.AsNoTracking(), tableFilterPayload);
+                return await PaginatedResultGenerator.Build(query.AsNoTracking(), filterDTO);
             });
         }
 
-        public async virtual Task<TableResponseDTO<{{entity.Name}}DTO>> Get{{entity.Name}}TableData(TableFilterDTO tableFilterPayload, IQueryable<{{entity.Name}}> query, bool authorize)
+        public async virtual Task<PaginatedResultDTO<{{entity.Name}}DTO>> GetPaginated{{entity.Name}}List(FilterDTO filterDTO, IQueryable<{{entity.Name}}> query, bool authorize)
         {
-            PaginationResult<{{entity.Name}}> paginationResult = new();
+            PaginatedResult<{{entity.Name}}> paginationResult = new();
             List<{{entity.Name}}DTO> dtoList = null;
 
             await _context.WithTransactionAsync(async () =>
             {
-                paginationResult = await Get{{entity.Name}}ListForPagination(tableFilterPayload, query);
+                paginationResult = await GetPaginated{{entity.Name}}List(filterDTO, query);
 
                 dtoList = await paginationResult.Query
-                    .Skip(tableFilterPayload.First)
-                    .Take(tableFilterPayload.Rows)
+                    .Skip(filterDTO.First)
+                    .Take(filterDTO.Rows)
                     .ProjectToType<{{entity.Name}}DTO>(Mapper.{{entity.Name}}ProjectToConfig())
                     .ToListAsync();
 
@@ -231,17 +231,17 @@ namespace {{basePartOfNamespace}}.Services
 {{GetPopulateDTOWithBlobPartsForDTOList(entity, entity.Properties)}}
             });
 
-            return new TableResponseDTO<{{entity.Name}}DTO> { Data = dtoList, TotalRecords = paginationResult.TotalRecords };
+            return new PaginatedResultDTO<{{entity.Name}}DTO> { Data = dtoList, TotalRecords = paginationResult.TotalRecords };
         }
 
-        public async Task<byte[]> Export{{entity.Name}}TableDataToExcel(TableFilterDTO tableFilterPayload, IQueryable<{{entity.Name}}> query, bool authorize)
+        public async Task<byte[]> Export{{entity.Name}}ListToExcel(FilterDTO filterDTO, IQueryable<{{entity.Name}}> query, bool authorize)
         {
-            PaginationResult<{{entity.Name}}> paginationResult = new();
+            PaginatedResult<{{entity.Name}}> paginationResult = new();
             List<{{entity.Name}}DTO> dtoList = null;
 
             await _context.WithTransactionAsync(async () =>
             {
-                paginationResult = await Get{{entity.Name}}ListForPagination(tableFilterPayload, query);
+                paginationResult = await GetPaginated{{entity.Name}}List(filterDTO, query);
 
                 dtoList = await paginationResult.Query.ProjectToType<{{entity.Name}}DTO>(Mapper.{{entity.Name}}ExcelProjectToConfig()).ToListAsync();
 
@@ -586,24 +586,24 @@ namespace {{basePartOfNamespace}}.Services
         /// <summary>
         /// It's mandatory to pass queryable ordered by the same field as the table data
         /// </summary>
-        public async Task<LazyLoadSelectedIdsResultDTO<{{extractedPropertyEntityIdType}}>> LazyLoadSelected{{oneToManyProperty.Name}}IdsFor{{entity.Name}}(TableFilterDTO tableFilterDTO, IQueryable<{{extractedPropertyEntity.Name}}> query, bool authorize)
+        public async Task<LazyLoadSelectedIdsResultDTO<{{extractedPropertyEntityIdType}}>> LazyLoadSelected{{oneToManyProperty.Name}}IdsFor{{entity.Name}}(FilterDTO filterDTO, IQueryable<{{extractedPropertyEntity.Name}}> query, bool authorize)
         {
             LazyLoadSelectedIdsResultDTO<{{extractedPropertyEntityIdType}}> lazyLoadSelectedIdsResultDTO = new();
 
             query = query
-                .Skip(tableFilterDTO.First)
-                .Take(tableFilterDTO.Rows)
+                .Skip(filterDTO.First)
+                .Take(filterDTO.Rows)
                 .Where(x => x.{{extractedEntityManyToManyProperty.Name}}
-                    .Any(x => x.Id == tableFilterDTO.{{entityIdType.GetTableFilterAdditionalFilterPropertyName()}}));
+                    .Any(x => x.Id == filterDTO.{{entityIdType.GetTableFilterAdditionalFilterPropertyName()}}));
 
             await _context.WithTransactionAsync(async () =>
             {
                 if (authorize)
                 {
-                    {{GetAuthorizeEntityMethodCall(entity.Name, CrudCodes.Read, $"({entityIdType})tableFilterDTO.{entityIdType.GetTableFilterAdditionalFilterPropertyName()}")}}
+                    {{GetAuthorizeEntityMethodCall(entity.Name, CrudCodes.Read, $"({entityIdType})filterDTO.{entityIdType.GetTableFilterAdditionalFilterPropertyName()}")}}
                 }
 
-                var paginationResult = await Get{{extractedPropertyEntity.Name}}ListForPagination(tableFilterDTO, query);
+                var paginationResult = await GetPaginated{{extractedPropertyEntity.Name}}List(filterDTO, query);
 
                 lazyLoadSelectedIdsResultDTO.SelectedIds = await paginationResult.Query
                     .Select(x => x.Id)
@@ -611,7 +611,7 @@ namespace {{basePartOfNamespace}}.Services
 
                 int count = await _context.DbSet<{{extractedPropertyEntity.Name}}>()
                     .Where(x => x.{{extractedEntityManyToManyProperty.Name}}
-                        .Any(x => x.Id == tableFilterDTO.{{entityIdType.GetTableFilterAdditionalFilterPropertyName()}}))
+                        .Any(x => x.Id == filterDTO.{{entityIdType.GetTableFilterAdditionalFilterPropertyName()}}))
                     .CountAsync();
 
                 lazyLoadSelectedIdsResultDTO.TotalRecordsSelected = count;
@@ -974,8 +974,8 @@ namespace {{basePartOfNamespace}}.Services
 
                     result.Add($$"""
                 var all{{property.Name}}Query = await GetAll{{property.Name}}QueryFor{{entity.Name}}(_context.DbSet<{{extractedEntity.Name}}>());
-                var {{property.Name.FirstCharToLower()}}PaginationResult = await Get{{extractedEntity.Name}}ListForPagination(saveBodyDTO.{{property.Name}}TableFilter, all{{property.Name}}Query);
-                await Update{{property.Name}}WithLazyTableSelectionFor{{entity.Name}}({{property.Name.FirstCharToLower()}}PaginationResult.Query, savedDTO.Id, saveBodyDTO);
+                var {{property.Name.FirstCharToLower()}}PaginatedResult = await GetPaginated{{extractedEntity.Name}}List(saveBodyDTO.{{property.Name}}TableFilter, all{{property.Name}}Query);
+                await Update{{property.Name}}WithLazyTableSelectionFor{{entity.Name}}({{property.Name.FirstCharToLower()}}PaginatedResult.Query, savedDTO.Id, saveBodyDTO);
 """);
                 }
             }
@@ -1353,7 +1353,7 @@ using {{basePartOfTheNamespace}}.DTO;
 using {{basePartOfTheNamespace}}.Entities;
 using {{basePartOfTheNamespace}}.Enums;
 using {{basePartOfTheNamespace}}.ExcelProperties;
-using {{basePartOfTheNamespace}}.TableFiltering;
+using {{basePartOfTheNamespace}}.Filtering;
 {{(projectName == "Security" ? "" : $"using {basePartOfTheNamespace.ReplaceEverythingAfterLast(".", ".Shared")}.Resources;")}}
 using Microsoft.EntityFrameworkCore;
 using System.Data;
@@ -1364,6 +1364,7 @@ using Spiderly.Security.Entities;
 using Spiderly.Shared.Excel;
 using Spiderly.Shared.Interfaces;
 using Spiderly.Shared.Services;
+using Spiderly.Shared.Classes;
 using Spiderly.Shared.DTO;
 using Spiderly.Shared.Extensions;
 using Spiderly.Shared.Exceptions;

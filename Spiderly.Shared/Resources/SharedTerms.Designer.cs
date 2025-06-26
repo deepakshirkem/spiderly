@@ -520,29 +520,20 @@ namespace Spiderly.Shared.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to User.
+        ///   Looks up a localized string similar to User Id.
         /// </summary>
-        public static string UserExtended {
+        public static string UserId {
             get {
-                return ResourceManager.GetString("UserExtended", resourceCulture);
+                return ResourceManager.GetString("UserId", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized string similar to Users.
         /// </summary>
-        public static string UserExtendedList {
+        public static string UserList {
             get {
-                return ResourceManager.GetString("UserExtendedList", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to User Id.
-        /// </summary>
-        public static string UserId {
-            get {
-                return ResourceManager.GetString("UserId", resourceCulture);
+                return ResourceManager.GetString("UserList", resourceCulture);
             }
         }
         

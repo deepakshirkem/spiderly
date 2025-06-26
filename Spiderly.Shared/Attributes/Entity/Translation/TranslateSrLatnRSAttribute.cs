@@ -21,7 +21,7 @@ namespace Spiderly.Shared.Attributes.Entity.Translation
     /// <b>Example:</b>
     /// <code>
     /// [TranslateSrLatnRS("Korisnik")]
-    /// public class UserExtended : BusinessObject&lt;long&gt;
+    /// public class User : BusinessObject&lt;long&gt;
     /// {
     ///     [TranslateSrLatnRS("Email adresa")]
     ///     public string Email { get; set; }

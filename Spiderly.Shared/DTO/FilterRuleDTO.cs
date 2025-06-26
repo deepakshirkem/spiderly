@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Spiderly.Shared.DTO
 {
-    public class TableFilterContext
+    public class FilterRuleDTO
     {
         public object Value { get; set; }
         public MatchModeCodes MatchMode { get; set; }

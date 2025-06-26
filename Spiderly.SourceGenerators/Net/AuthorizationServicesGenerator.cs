@@ -155,7 +155,7 @@ namespace {{basePartOfNamespace}}.Services
         {
             await _context.WithTransactionAsync(async () =>
             {
-                await AuthorizeAndThrowAsync<{{(isSecurityProject ? "TUser" : "UserExtended")}}>({{projectName}}PermissionCodes.{{permissionCodePrefix}}{{entity.Name}});
+                await AuthorizeAndThrowAsync<{{(isSecurityProject ? "TUser" : "User")}}>({{projectName}}PermissionCodes.{{permissionCodePrefix}}{{entity.Name}});
             });
         }
 """;

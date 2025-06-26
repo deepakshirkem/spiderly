@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { AvatarModule } from 'primeng/avatar';
 import { LayoutBaseService } from '../../../services/app-layout-base.service';
-import { User } from '../../../entities/security-entities';
+import { UserBase } from '../../../entities/security-entities';
 import { filter, Subscription } from 'rxjs';
 import { AuthBaseService } from '../../../services/auth-base.service';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
@@ -36,7 +36,7 @@ export class ProfileAvatarComponent {
 
   private initTopBarSubscription: Subscription | null = null;
 
-  currentUser: User;
+  currentUser: UserBase;
   userProfilePath: string;
   unreadNotificationsCount: number;
   menuItems: ProfileAvatarModalMenuItem[] = [];

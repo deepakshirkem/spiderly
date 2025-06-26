@@ -24,8 +24,7 @@ namespace Spiderly.SourceGenerators.Shared
 
         public static List<string> BaseClassNames { get; set; } = new()
         {
-            "TableFilter",
-            "TableResponse",
+            "Filter",
             "LazyTableSelection",
             "Namebook",
             "Codebook",
@@ -34,9 +33,9 @@ namespace Spiderly.SourceGenerators.Shared
             "ReadonlyObject",
             "ExcelReportOptions",
             "UserRole",
-            "PaginationResult",
-            "TableFilterContext",
-            "TableFilterSortMeta",
+            "PaginatedResult",
+            "FilterRule",
+            "FilterSortMeta",
             "LazyLoadSelectedIdsResult",
             "BusinessObjectCodebook", // Nucleus
             "BusinessObjectNamebook", // Nucleus
@@ -767,7 +766,7 @@ namespace Spiderly.SourceGenerators.Shared
                     result.Add(new SpiderlyProperty { Name = $"Selected{property.Name}Ids", Type = $"List<{extractedEntityIdType}>", EntityName = $"{entity.Name}SaveBodyDTO" });
                     result.Add(new SpiderlyProperty { Name = $"Unselected{property.Name}Ids", Type = $"List<{extractedEntityIdType}>", EntityName = $"{entity.Name}SaveBodyDTO" });
                     result.Add(new SpiderlyProperty { Name = $"AreAll{property.Name}Selected", Type = "bool?", EntityName = $"{entity.Name}SaveBodyDTO" });
-                    result.Add(new SpiderlyProperty { Name = $"{property.Name}TableFilter", Type = "TableFilterDTO", EntityName = $"{entity.Name}SaveBodyDTO" });
+                    result.Add(new SpiderlyProperty { Name = $"{property.Name}TableFilter", Type = "FilterDTO", EntityName = $"{entity.Name}SaveBodyDTO" });
                 }
             }
 
@@ -1241,9 +1240,9 @@ namespace Spiderly.SourceGenerators.Shared
 
             parts[parts.Length - 1] = parts[parts.Length - 1].Replace(">", ""); // long
 
-            if (cSharpType.Contains("TableResponseDTO"))
+            if (cSharpType.Contains("PaginatedResultDTO"))
             {
-                result = $"TableResponse<{parts[parts.Length - 1].Replace("DTO", "")}>";
+                result = $"PaginatedResult<{parts[parts.Length - 1].Replace("DTO", "")}>";
             }
             else if (cSharpType.Contains("LazyLoadSelectedIdsResultDTO"))
             {

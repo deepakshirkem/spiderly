@@ -1,13 +1,13 @@
 import { BaseEntity } from "./base-entity";
-import { TableFilter } from "./table-filter";
-import { TableFilterContext } from "./table-filter-context";
-import { TableFilterSortMeta } from "./table-filter-sort-meta";
+import { Filter } from "./filter";
+import { FilterRule } from "./filter-rule";
+import { FilterSortMeta } from "./filter-sort-meta";
 import { MimeTypes } from "./mime-type";
 import { RegistrationVerificationResultStatusCodes } from "../enums/security-enums";
 import { Namebook } from "./namebook";
 
 
-export class User extends BaseEntity
+export class UserBase extends BaseEntity
 {
     id?: number;
 	email?: string;
@@ -21,7 +21,7 @@ export class User extends BaseEntity
 		email?: string;
     } = {}
     ) {
-        super('User'); 
+        super('UserBase'); 
 
         this.id = id;
 		this.email = email;

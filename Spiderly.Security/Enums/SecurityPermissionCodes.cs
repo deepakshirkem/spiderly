@@ -8,9 +8,9 @@ namespace Spiderly.Security.Enums
 {
     public static partial class SecurityPermissionCodes
     {
-        public static string ReadUserExtended { get; } = "ReadUserExtended";
-        public static string EditUserExtended { get; } = "EditUserExtended";
-        public static string InsertUserExtended { get; } = "InsertUserExtended";
-        public static string DeleteUserExtended { get; } = "DeleteUserExtended";
+        public static string ReadUser { get; } = "ReadUser";
+        public static string EditUser { get; } = "EditUser";
+        public static string InsertUser { get; } = "InsertUser";
+        public static string DeleteUser { get; } = "DeleteUser";
     }
 }

@@ -5,14 +5,14 @@ import { FormsModule } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { SpiderlyControlsModule } from '../../controls/spiderly-controls.module';
-import { TableResponse } from '../../entities/table-response';
-import { TableFilter } from '../../entities/table-filter';
+import { PaginatedResult } from '../../entities/paginated-result';
+import { Filter } from '../../entities/filter';
 import { TooltipModule } from 'primeng/tooltip';
 import { ButtonModule } from 'primeng/button';
 import { MultiSelectModule } from 'primeng/multiselect';
 import { CheckboxModule } from 'primeng/checkbox';
 import { MatchModeCodes } from '../../enums/match-mode-enum-codes';
-import { Action, Column } from '../spiderly-data-table/spiderly-data-table.component';
+import { Action } from '../spiderly-data-table/spiderly-data-table.component';
 import { SelectItem } from 'primeng/api';
 import { DatePickerModule } from 'primeng/datepicker';
 import { InputTextModule } from 'primeng/inputtext';
@@ -49,9 +49,9 @@ export class SpiderlyDataViewComponent<T> implements OnInit {
   */
   @Input() items: T[];
   @Input() rows: number = 10;
-  @Input() filters: Filter<T>[] = [];
+  @Input() filters: DataViewFilter<T>[] = [];
   totalRecords: number;
-  @Output() onLazyLoad: EventEmitter<TableFilter> = new EventEmitter();
+  @Output() onLazyLoad: EventEmitter<Filter> = new EventEmitter();
 
   @Input() showCardWrapper: boolean = true;
   /**
@@ -63,7 +63,7 @@ export class SpiderlyDataViewComponent<T> implements OnInit {
   @Input() applyFiltersIcon: string = 'pi pi-filter';
   @Input() clearFiltersIcon: string = 'pi pi-filter-slash';
   
-  @Input() getTableDataObservableMethod: (tableFilter: TableFilter) => Observable<TableResponse>;
+  @Input() getPaginatedListObservableMethod: (filter: Filter) => Observable<PaginatedResult>;
 
   lastLazyLoadEvent: TableLazyLoadEvent;
   loading: boolean = true;
@@ -111,13 +111,13 @@ export class SpiderlyDataViewComponent<T> implements OnInit {
       }
     }
 
-    let tableFilter = event as unknown as TableFilter<T>;
+    let tableFilter = event as unknown as Filter<T>;
 
     tableFilter.filters = transformedFilter;
 
     this.onLazyLoad.next(tableFilter);
     
-    this.getTableDataObservableMethod(tableFilter).subscribe({
+    this.getPaginatedListObservableMethod(tableFilter).subscribe({
       next: async (res) => { 
         this.items = res.data;
         this.totalRecords = res.totalRecords;
@@ -196,12 +196,12 @@ export interface DataViewCardBody<T> {
   index: number;
 }
 
-export interface Filter<T extends BaseEntity> {
-  name?: string;
+export interface DataViewFilter<T extends BaseEntity> {
+  label?: string;
   field?: string & keyof T;
   filterField?: string & keyof T; // Made specificaly for multiautocomplete, maybe for something more in the future
-  filterType?: 'text' | 'date' | 'multiselect' | 'boolean' | 'numeric' | 'blob';
-  filterPlaceholder?: string;
+  type?: 'text' | 'date' | 'multiselect' | 'boolean' | 'numeric' | 'blob';
+  placeholder?: string;
   showMatchModes?: boolean;
   dropdownOrMultiselectValues?: PrimengOption[];
 }

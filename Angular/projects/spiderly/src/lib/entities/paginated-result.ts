@@ -1,4 +1,4 @@
-export class TableResponse<T = any> {
+export class PaginatedResult<T = any> {
     data?: T[];
     totalRecords: number;
 }

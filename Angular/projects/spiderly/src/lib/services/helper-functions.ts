@@ -4,7 +4,7 @@ import { BaseEntity } from "../entities/base-entity";
 import { SpiderlyFormGroup } from "../components/spiderly-form-control/spiderly-form-control";
 import { map, Observable } from 'rxjs';
 import * as FileSaver from 'file-saver';
-import { TableFilter } from "../entities/table-filter";
+import { Filter } from "../entities/filter";
 import { Namebook } from "../entities/namebook";
 import { Codebook } from "../entities/codebook";
 import { PrimengOption } from "../entities/primeng-option";
@@ -229,8 +229,8 @@ export function capitalizeFirstLetter(inputString: string): string {
       return false;
   }
 
-  export function exportListToExcel(exportTableDataToExcelObservableMethod: (tableFilter: TableFilter) => Observable<any>, tableFilter: TableFilter) {
-    exportTableDataToExcelObservableMethod(tableFilter).subscribe(res => {
+  export function exportListToExcel(exportListToExcelObservableMethod: (filter: Filter) => Observable<any>, filter: Filter) {
+    exportListToExcelObservableMethod(filter).subscribe(res => {
         let fileName = getFileNameFromContentDisposition(res, "ExcelExport.xlsx");
         FileSaver.saveAs(res.body, decodeURIComponent(fileName));
     });

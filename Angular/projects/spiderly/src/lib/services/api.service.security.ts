@@ -2,10 +2,10 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Namebook } from '../entities/namebook';
-import { TableFilter } from '../entities/table-filter';
-import { Login, Registration, RegistrationVerificationResult, RefreshTokenRequest, AuthResult, Role, User, ExternalProvider, VerificationTokenRequest, RoleSaveBody, RoleMainUIForm } from '../entities/security-entities';
+import { Filter } from '../entities/filter';
+import { Login, Registration, RegistrationVerificationResult, RefreshTokenRequest, AuthResult, Role, UserBase, ExternalProvider, VerificationTokenRequest, RoleSaveBody, RoleMainUIForm } from '../entities/security-entities';
 import { ConfigBaseService } from './config-base.service';
-import { TableResponse } from '../entities/table-response';
+import { PaginatedResult } from '../entities/paginated-result';
 
 @Injectable({
     providedIn: 'root'
@@ -54,8 +54,8 @@ export class ApiSecurityService {
 
     //#region User
 
-    getCurrentUser = (): Observable<User> => { 
-        return this.http.get<User>(`${this.config.apiUrl}/Security/GetCurrentUser`, this.config.httpSkipSpinnerOptions);
+    getCurrentUserBase = (): Observable<UserBase> => { 
+        return this.http.get<UserBase>(`${this.config.apiUrl}/Security/GetCurrentUserBase`, this.config.httpSkipSpinnerOptions);
     }
 
     getCurrentUserPermissionCodes = (): Observable<string[]> => { 
@@ -66,12 +66,12 @@ export class ApiSecurityService {
 
     //#region Role
 
-    getRoleTableData = (dto: TableFilter): Observable<TableResponse> => { 
-        return this.http.post<TableResponse>(`${this.config.apiUrl}/Security/GetRoleTableData`, dto, this.config.httpSkipSpinnerOptions);
+    getPaginatedRoleList = (dto: Filter): Observable<PaginatedResult> => { 
+        return this.http.post<PaginatedResult>(`${this.config.apiUrl}/Security/GetPaginatedRoleList`, dto, this.config.httpSkipSpinnerOptions);
     }
 
-    exportRoleTableDataToExcel = (dto: TableFilter): Observable<any> => { 
-        return this.http.post<any>(`${this.config.apiUrl}/Security/ExportRoleTableDataToExcel`, dto, this.config.httpOptions);
+    exportRoleListToExcel = (dto: Filter): Observable<any> => { 
+        return this.http.post<any>(`${this.config.apiUrl}/Security/ExportRoleListToExcel`, dto, this.config.httpOptions);
     }
 
     deleteRole = (id: number): Observable<any> => { 

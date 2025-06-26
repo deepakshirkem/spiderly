@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Spiderly.Security.DTO
 {
-    public class UserDTO
+    public class UserBaseDTO
     {
         public string Email { get; set; }
         public long Id { get; set; }

@@ -4,7 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, of, Subject, Subscription } from 'rxjs';
 import { map, tap, delay, finalize } from 'rxjs/operators';
 import { SocialUser, SocialAuthService } from '@abacritt/angularx-social-login';
-import { ExternalProvider, Login, VerificationTokenRequest, AuthResult, Registration, RegistrationVerificationResult, RefreshTokenRequest, User } from '../entities/security-entities';
+import { ExternalProvider, Login, VerificationTokenRequest, AuthResult, Registration, RegistrationVerificationResult, RefreshTokenRequest, UserBase } from '../entities/security-entities';
 import { ConfigBaseService } from './config-base.service';
 import { ApiSecurityService } from './api.service.security';
 import { InitCompanyAuthDialogDetails } from '../entities/init-company-auth-dialog-details';
@@ -19,7 +19,7 @@ export class AuthBaseService implements OnDestroy {
   protected _currentUserPermissionCodes = new BehaviorSubject<string[] | null>(undefined);
   currentUserPermissionCodes$ = this._currentUserPermissionCodes.asObservable();
 
-  protected _user = new BehaviorSubject<User | null>(undefined);
+  protected _user = new BehaviorSubject<UserBase | null>(undefined);
   user$ = this._user.asObservable();
 
   // Google auth
@@ -61,7 +61,7 @@ export class AuthBaseService implements OnDestroy {
       if (event.key === 'login-event') {
         this.stopTokenTimer();
 
-        this.apiService.getCurrentUser().subscribe((user: User) => {
+        this.apiService.getCurrentUserBase().subscribe((user: UserBase) => {
             this._user.next({
               id: user.id,
               email: user.email

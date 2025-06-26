@@ -12,10 +12,10 @@ import { PrimengOption } from '../../entities/primeng-option';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { SpiderlyControlsModule } from '../../controls/spiderly-controls.module';
 import { SpiderlyFormControl } from '../spiderly-form-control/spiderly-form-control';
-import { TableResponse } from '../../entities/table-response';
+import { PaginatedResult } from '../../entities/paginated-result';
 import { LazyLoadSelectedIdsResult } from '../../entities/lazy-load-selected-ids-result';
 import { exportListToExcel, getHtmlImgDisplayString64 } from '../../services/helper-functions';
-import { TableFilter } from '../../entities/table-filter';
+import { Filter } from '../../entities/filter';
 import { TooltipModule } from 'primeng/tooltip';
 import { ButtonModule } from 'primeng/button';
 import { MultiSelectModule } from 'primeng/multiselect';
@@ -51,8 +51,8 @@ export class SpiderlyDataTableComponent implements OnInit {
   totalRecords: number;
   @Output() onTotalRecordsChange: EventEmitter<number> = new EventEmitter();
   
-  @Input() getTableDataObservableMethod: (tableFilter: TableFilter) => Observable<TableResponse>;
-  @Input() exportTableDataToExcelObservableMethod: (tableFilter: TableFilter) => Observable<any>;
+  @Input() getPaginatedListObservableMethod: (tableFilter: Filter) => Observable<PaginatedResult>;
+  @Input() exportListToExcelObservableMethod: (tableFilter: Filter) => Observable<any>;
   @Input() deleteItemFromTableObservableMethod: (rowId: number) => Observable<any>;
 
   lastLazyLoadEvent: TableLazyLoadEvent;
@@ -63,13 +63,13 @@ export class SpiderlyDataTableComponent implements OnInit {
   currentPageSelectedItemsFromDb: number[] = []; // Made so we can add only newly selected items to the newlySelectedItems
   @Input() unselectedItems: number[] = [];
   @Input() selectionMode: 'single' | 'multiple' | undefined | null;
-  @Output() onLazyLoad: EventEmitter<TableFilter> = new EventEmitter();
+  @Output() onLazyLoad: EventEmitter<Filter> = new EventEmitter();
   rowsSelectedNumber: number = 0;
   isAllSelected: boolean = null;
   fakeIsAllSelected: boolean = false; // Only for showing checkboxes, we will not send this to the backend
   isFirstTimeLazyLoad: boolean = true;
   @Output() onIsAllSelectedChange: EventEmitter<AllClickEvent> = new EventEmitter();
-  @Input() selectedLazyLoadObservableMethod: (tableFilter: TableFilter) => Observable<LazyLoadSelectedIdsResult>;
+  @Input() selectedLazyLoadObservableMethod: (tableFilter: Filter) => Observable<LazyLoadSelectedIdsResult>;
   @Input() additionalFilterIdLong: number;
   
   matchModeDateOptions: SelectItem[] = [];
@@ -103,6 +103,7 @@ export class SpiderlyDataTableComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    let a = new Filter<any>();
     this.matchModeDateOptions = [
       { label: this.translocoService.translate('OnDate'), value: MatchModeCodes.Equals },
       { label: this.translocoService.translate('DatesBefore'), value: MatchModeCodes.LessThan },
@@ -123,12 +124,12 @@ export class SpiderlyDataTableComponent implements OnInit {
   lazyLoad(event: TableLazyLoadEvent) {
     this.lastLazyLoadEvent = event;
 
-    let tableFilter: TableFilter = event as unknown as TableFilter;
+    let tableFilter: Filter = event as unknown as Filter;
     tableFilter.additionalFilterIdLong = this.additionalFilterIdLong;
 
     this.onLazyLoad.next(tableFilter);
     
-    this.getTableDataObservableMethod(tableFilter).subscribe({
+    this.getPaginatedListObservableMethod(tableFilter).subscribe({
       next: async (res) => { 
         this.items = res.data;
         this.totalRecords = res.totalRecords;
@@ -364,10 +365,10 @@ export class SpiderlyDataTableComponent implements OnInit {
   }
 
   exportListToExcel() {
-    let tableFilter: TableFilter = this.lastLazyLoadEvent as unknown as TableFilter;
-    tableFilter.additionalFilterIdLong = this.additionalFilterIdLong;
+    let filter: Filter = this.lastLazyLoadEvent as unknown as Filter;
+    filter.additionalFilterIdLong = this.additionalFilterIdLong;
 
-    exportListToExcel(this.exportTableDataToExcelObservableMethod, tableFilter);
+    exportListToExcel(this.exportListToExcelObservableMethod, filter);
   }
 
   clear(table: Table) {

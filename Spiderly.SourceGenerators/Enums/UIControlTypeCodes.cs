@@ -21,7 +21,7 @@ namespace Spiderly.SourceGenerators.Enums
         MultiSelect,
         Password,
         TextBlock,
-        Table, // FT: For: Simple M2M lazy load
-        TODO
+        Table, // For: Simple M2M lazy load
+        None
     }
 }

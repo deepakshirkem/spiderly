@@ -22,8 +22,7 @@ namespace Spiderly.Shared.Enums
         MultiAutocomplete,
         MultiSelect,
         Password,
-        TextBlock,
-        TODO
+        TextBlock
     }
 }
 

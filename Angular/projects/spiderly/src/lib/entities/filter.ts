@@ -1,16 +1,15 @@
-import { BaseEntity } from "../entities/base-entity";
-import { TableFilterContext } from "../entities/table-filter-context";
-import { TableFilterSortMeta } from "../entities/table-filter-sort-meta";
-import { MatchModeCodes } from "../enums/match-mode-enum-codes";
+import { BaseEntity } from "./base-entity";
+import { FilterSortMeta as FilterSortMeta } from "./filter-sort-meta";
+import { FilterRule } from "./filter-rule";
 
-export class TableFilter<T extends BaseEntity=any> extends BaseEntity
+export class Filter<T extends BaseEntity=any> extends BaseEntity
 {
-    filters?: { [K in keyof T]?: { value: any; matchMode: MatchModeCodes }[] };
+    filters?: { [K in keyof T]?: FilterRule[] };
     first?: number;
     rows?: number;
     sortField?: string;
     sortOrder?: number;
-    multiSortMeta?: TableFilterSortMeta[];
+    multiSortMeta?: FilterSortMeta[];
     additionalFilterIdInt?: number;
     additionalFilterIdLong?: number;
   
@@ -25,17 +24,17 @@ export class TableFilter<T extends BaseEntity=any> extends BaseEntity
         additionalFilterIdInt,
         additionalFilterIdLong,
     }:{
-        filters?: { [K in keyof T]?: { value: any; matchMode: MatchModeCodes }[] };
+        filters?: { [K in keyof T]?: FilterRule[] };
         first?: number;
         rows?: number;
         sortField?: string;
         sortOrder?: number;
-        multiSortMeta?: TableFilterSortMeta[];
+        multiSortMeta?: FilterSortMeta[];
         additionalFilterIdInt?: number;
         additionalFilterIdLong?: number;
     } = {}
     ) {
-        super('TableFilter');
+        super('Filter');
 
         this.filters = filters;
         this.first = first;

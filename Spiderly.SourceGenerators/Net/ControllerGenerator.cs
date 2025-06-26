@@ -67,7 +67,8 @@ namespace Spiderly.SourceGenerators.Net
 
             List<SpiderlyClass> currentProjectClasses = Helpers.GetSpiderlyClasses(classes, referencedProjectEntitiesAndServices);
             List<SpiderlyClass> customControllers = currentProjectClasses.Where(x => x.Namespace.EndsWith(".Controllers")).ToList();
-            List<SpiderlyClass> referencedProjectEntities = referencedProjectEntitiesAndServices.Where(x => x.Namespace.EndsWith(".Entities")).ToList();
+            List<SpiderlyClass> allEntities = referencedProjectEntitiesAndServices.Where(x => x.Namespace.EndsWith(".Entities")).ToList();
+            List<SpiderlyClass> currentAppEntities = allEntities.Where(x => x.Namespace != "Spiderly.Security.Entities").ToList();
             List<SpiderlyClass> referencedProjectServices = referencedProjectEntitiesAndServices.Where(x => x.Namespace.EndsWith(".Services")).ToList();
 
             string namespaceValue = currentProjectClasses[0].Namespace;
@@ -89,25 +90,25 @@ using Spiderly.Shared.DTO;
 using {{appName}}.Shared.Resources;
 using {{appName}}.Business.Entities;
 using {{appName}}.Business.DTO;
-{{string.Join("\n", Helpers.GetEntityClassesUsings(referencedProjectEntities))}}
-{{string.Join("\n", Helpers.GetDTOClassesUsings(referencedProjectEntities))}}
+{{string.Join("\n", Helpers.GetEntityClassesUsings(allEntities))}}
+{{string.Join("\n", Helpers.GetDTOClassesUsings(allEntities))}}
 
 namespace {{basePartOfNamespace}}.Controllers
 {
-{{string.Join("\n\n", GetControllerClasses(referencedProjectEntities, referencedProjectServices))}}
+{{string.Join("\n\n", GetControllerClasses(allEntities, currentAppEntities, referencedProjectServices, customControllers))}}
 }
 """;
 
             context.AddSource($"{appName}BaseControllers.generated", SourceText.From(result, Encoding.UTF8));
         }
 
-        public static List<string> GetControllerClasses(List<SpiderlyClass> referencedProjectEntities, List<SpiderlyClass> referencedProjectServices)
+        public static List<string> GetControllerClasses(List<SpiderlyClass> allEntities, List<SpiderlyClass> currentAppEntities, List<SpiderlyClass> referencedProjectServices, List<SpiderlyClass> customControllers)
         {
             List<string> result = new();
 
-            foreach (IGrouping<string, SpiderlyClass> referencedProjectEntityGroupedClasses in referencedProjectEntities.GroupBy(x => x.ControllerName))
+            foreach (IGrouping<string, SpiderlyClass> groupedControllerEntities in currentAppEntities.GroupBy(x => x.ControllerName))
             {
-                string servicesNamespace = referencedProjectEntityGroupedClasses.FirstOrDefault().Namespace.Replace(".Entities", ".Services");
+                string servicesNamespace = groupedControllerEntities.FirstOrDefault().Namespace.Replace(".Entities", ".Services");
                 SpiderlyClass businessServiceClass = referencedProjectServices
                     .Where(x => x.BaseType != null &&
                                 x.Namespace != null &&
@@ -122,12 +123,13 @@ namespace {{basePartOfNamespace}}.Controllers
                 string businessServiceName = businessServiceClass.Name;
 
                 result.Add($$"""
-    public class {{referencedProjectEntityGroupedClasses.Key}}BaseController : SpiderlyBaseController
+{{GetControllerAttributes(groupedControllerEntities, customControllers)}}
+    public class {{groupedControllerEntities.Key}}BaseController : SpiderlyBaseController
     {
         private readonly IApplicationDbContext _context;
         private readonly {{servicesNamespace}}.{{GetBusinessServiceClassName(businessServiceName)}} _businessService;
 
-        public {{referencedProjectEntityGroupedClasses.Key}}BaseController(
+        public {{groupedControllerEntities.Key}}BaseController(
             IApplicationDbContext context, 
             {{servicesNamespace}}.{{GetBusinessServiceClassName(businessServiceName)}} businessService
         )
@@ -136,7 +138,7 @@ namespace {{basePartOfNamespace}}.Controllers
             _businessService = businessService;
         }
 
-{{string.Join("\n\n", GetControllerMethods(referencedProjectEntityGroupedClasses.ToList(), referencedProjectEntities))}}
+{{string.Join("\n\n", GetControllerMethods(groupedControllerEntities.ToList(), allEntities))}}
 
     }
 """);
@@ -145,81 +147,92 @@ namespace {{basePartOfNamespace}}.Controllers
             return result;
         }
 
-        private static List<string> GetControllerMethods(List<SpiderlyClass> groupedReferencedProjectEntities, List<SpiderlyClass> allEntities)
+        private static string GetControllerAttributes(IGrouping<string, SpiderlyClass> groupedControllerEntities, List<SpiderlyClass> customControllers)
+        {
+            if (customControllers.Any(x => x.BaseType == $"{groupedControllerEntities.Key}BaseController"))
+                return null;
+
+            return $$"""
+    [ApiController]
+    [Route("/api/{{groupedControllerEntities.Key}}/[action]")]
+""";
+        }
+
+        private static List<string> GetControllerMethods(List<SpiderlyClass> groupedControllerEntities, List<SpiderlyClass> allEntities)
         {
             List<string> result = new();
 
-            foreach (SpiderlyClass referencedProjectEntity in groupedReferencedProjectEntities)
+            foreach (SpiderlyClass controllerEntity in groupedControllerEntities)
             {
-                if (referencedProjectEntity.IsManyToMany()) // TODO FT: Do something with M2M entities
+                if (controllerEntity.IsManyToMany()) // TODO FT: Do something with M2M entities
                     continue;
 
-                string referencedProjectEntityClassIdType = referencedProjectEntity.GetIdType(allEntities);
+                string referencedProjectEntityClassIdType = controllerEntity.GetIdType(allEntities);
 
                 result.Add($$"""
-        #region {{referencedProjectEntity.Name}}
+        #region {{controllerEntity.Name}}
 
         #region Read
 
         [HttpPost]
         [AuthGuard]
-        public virtual async Task<TableResponseDTO<{{referencedProjectEntity.Name}}DTO>> Get{{referencedProjectEntity.Name}}TableData(TableFilterDTO tableFilterDTO)
+        public virtual async Task<PaginatedResultDTO<{{controllerEntity.Name}}DTO>> GetPaginated{{controllerEntity.Name}}List(FilterDTO filterDTO)
         {
-            return await _businessService.Get{{referencedProjectEntity.Name}}TableData(tableFilterDTO, _context.DbSet<{{referencedProjectEntity.Name}}>(), {{Helpers.GetShouldAuthorizeEntityString(referencedProjectEntity)}});
+            return await _businessService.GetPaginated{{controllerEntity.Name}}List(filterDTO, _context.DbSet<{{controllerEntity.Name}}>(), {{Helpers.GetShouldAuthorizeEntityString(controllerEntity)}});
         }
 
         [HttpPost]
         [AuthGuard]
-        public virtual async Task<IActionResult> Export{{referencedProjectEntity.Name}}TableDataToExcel(TableFilterDTO tableFilterDTO)
+        public virtual async Task<IActionResult> Export{{controllerEntity.Name}}ListToExcel(FilterDTO filterDTO)
         {
-            byte[] fileContent = await _businessService.Export{{referencedProjectEntity.Name}}TableDataToExcel(tableFilterDTO, _context.DbSet<{{referencedProjectEntity.Name}}>(), {{Helpers.GetShouldAuthorizeEntityString(referencedProjectEntity)}});
+            byte[] fileContent = await _businessService.Export{{controllerEntity.Name}}ListToExcel(filterDTO, _context.DbSet<{{controllerEntity.Name}}>(), {{Helpers.GetShouldAuthorizeEntityString(controllerEntity)}});
             return File(
                 fileContent, 
                 SettingsProvider.Current.ExcelContentType, 
-                Uri.EscapeDataString($"{TermsGenerated.ResourceManager.GetExcelTranslation("{{referencedProjectEntity.Name}}ExcelExportName", "{{referencedProjectEntity.Name}}List")}.xlsx")
+                Uri.EscapeDataString($"{TermsGenerated.ResourceManager.GetExcelTranslation("{{controllerEntity.Name}}ExcelExportName", "{{controllerEntity.Name}}List")}.xlsx")
             );
         }
 
         [HttpGet]
         [AuthGuard]
-        public virtual async Task<List<{{referencedProjectEntity.Name}}DTO>> Get{{referencedProjectEntity.Name}}List()
+        public virtual async Task<List<{{controllerEntity.Name}}DTO>> Get{{controllerEntity.Name}}List()
         {
-            return await _businessService.Get{{referencedProjectEntity.Name}}DTOList(_context.DbSet<{{referencedProjectEntity.Name}}>(), {{Helpers.GetShouldAuthorizeEntityString(referencedProjectEntity)}});
+            return await _businessService.Get{{controllerEntity.Name}}DTOList(_context.DbSet<{{controllerEntity.Name}}>(), {{Helpers.GetShouldAuthorizeEntityString(controllerEntity)}});
         }
 
         [HttpGet]
         [AuthGuard]
-        public virtual async Task<{{referencedProjectEntity.Name}}MainUIFormDTO> Get{{referencedProjectEntity.Name}}MainUIFormDTO({{referencedProjectEntityClassIdType}} id)
+        public virtual async Task<{{controllerEntity.Name}}MainUIFormDTO> Get{{controllerEntity.Name}}MainUIFormDTO({{referencedProjectEntityClassIdType}} id)
         {
-            return await _businessService.Get{{referencedProjectEntity.Name}}MainUIFormDTO(id, {{Helpers.GetShouldAuthorizeEntityString(referencedProjectEntity)}});
+            return await _businessService.Get{{controllerEntity.Name}}MainUIFormDTO(id, {{Helpers.GetShouldAuthorizeEntityString(controllerEntity)}});
         }
 
         [HttpGet]
         [AuthGuard]
-        public virtual async Task<{{referencedProjectEntity.Name}}DTO> Get{{referencedProjectEntity.Name}}({{referencedProjectEntityClassIdType}} id)
+        public virtual async Task<{{controllerEntity.Name}}DTO> Get{{controllerEntity.Name}}({{referencedProjectEntityClassIdType}} id)
         {
-            return await _businessService.Get{{referencedProjectEntity.Name}}DTO(id, {{Helpers.GetShouldAuthorizeEntityString(referencedProjectEntity)}});
+            return await _businessService.Get{{controllerEntity.Name}}DTO(id, {{Helpers.GetShouldAuthorizeEntityString(controllerEntity)}});
         }
 
-{{GetManyToOneReadMethods(referencedProjectEntity, allEntities)}}
+{{GetManyToOneReadMethods(controllerEntity, allEntities)}}
 
-{{string.Join("\n\n", GetOrderedOneToManyControllerMethods(referencedProjectEntity, allEntities))}}
+{{string.Join("\n\n", GetOrderedOneToManyControllerMethods(controllerEntity, allEntities))}}
 
-{{string.Join("\n\n", GetManyToManyControllerMethods(referencedProjectEntity, allEntities))}}
+{{string.Join("\n\n", GetManyToManyControllerMethods(controllerEntity, allEntities))}}
 
         #endregion
 
         #region Save
 
-{{GetSaveControllerMethods(referencedProjectEntity)}}
+{{GetSaveControllerMethods(controllerEntity)}}
 
-{{string.Join("\n\n", GetUploadBlobControllerMethods(referencedProjectEntity, allEntities))}}
+{{string.Join("\n\n", GetUploadBlobControllerMethods(controllerEntity, allEntities))}}
 
         #endregion
 
         #region Delete
 
-{{GetDeleteControllerMethods(referencedProjectEntity, allEntities)}}
+{{GetDeleteControllerMethods(controllerEntity, allEntities)}}
 
         #endregion
 
@@ -332,16 +345,16 @@ namespace {{basePartOfNamespace}}.Controllers
             return $$"""
         [HttpPost]
         [AuthGuard]
-        public virtual async Task<TableResponseDTO<{{extractedEntity.Name}}DTO>> Get{{property.Name}}TableDataFor{{entity.Name}}(TableFilterDTO tableFilterDTO)
+        public virtual async Task<PaginatedResultDTO<{{extractedEntity.Name}}DTO>> GetPaginated{{property.Name}}ListFor{{entity.Name}}(FilterDTO filterDTO)
         {
-            return await _businessService.Get{{extractedEntity.Name}}TableData(tableFilterDTO, _context.DbSet<{{extractedEntity.Name}}>().OrderBy(x => x.Id), false);
+            return await _businessService.GetPaginated{{extractedEntity.Name}}List(filterDTO, _context.DbSet<{{extractedEntity.Name}}>().OrderBy(x => x.Id), false);
         }
 
         [HttpPost]
         [AuthGuard]
-        public virtual async Task<IActionResult> Export{{property.Name}}TableDataToExcelFor{{entity.Name}}(TableFilterDTO tableFilterDTO)
+        public virtual async Task<IActionResult> Export{{property.Name}}ListToExcelFor{{entity.Name}}(FilterDTO filterDTO)
         {
-            byte[] fileContent = await _businessService.Export{{extractedEntity.Name}}TableDataToExcel(tableFilterDTO, _context.DbSet<{{extractedEntity.Name}}>(), false);
+            byte[] fileContent = await _businessService.Export{{extractedEntity.Name}}ListToExcel(filterDTO, _context.DbSet<{{extractedEntity.Name}}>(), false);
             return File(
                 fileContent, 
                 SettingsProvider.Current.ExcelContentType, 
@@ -351,9 +364,9 @@ namespace {{basePartOfNamespace}}.Controllers
 
         [HttpPost]
         [AuthGuard]
-        public virtual async Task<LazyLoadSelectedIdsResultDTO<{{extractedEntityIdType}}>> LazyLoadSelected{{property.Name}}IdsFor{{entity.Name}}(TableFilterDTO tableFilterDTO)
+        public virtual async Task<LazyLoadSelectedIdsResultDTO<{{extractedEntityIdType}}>> LazyLoadSelected{{property.Name}}IdsFor{{entity.Name}}(FilterDTO filterDTO)
         {
-            return await _businessService.LazyLoadSelected{{property.Name}}IdsFor{{entity.Name}}(tableFilterDTO, _context.DbSet<{{extractedEntity.Name}}>().OrderBy(x => x.Id), {{Helpers.GetShouldAuthorizeEntityString(entity)}});
+            return await _businessService.LazyLoadSelected{{property.Name}}IdsFor{{entity.Name}}(filterDTO, _context.DbSet<{{extractedEntity.Name}}>().OrderBy(x => x.Id), {{Helpers.GetShouldAuthorizeEntityString(entity)}});
         }
 """;
         }
@@ -465,7 +478,7 @@ namespace {{basePartOfNamespace}}.Controllers
         private static string GetBusinessServiceClassName(string businessServiceName)
         {
             if (businessServiceName.Contains("Security"))
-                return $"{businessServiceName}<UserExtended>";
+                return $"{businessServiceName}<User>";
             else
                 return businessServiceName;
         }

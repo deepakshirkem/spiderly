@@ -248,7 +248,7 @@
     <value>Version</value>
     <comment>Verzija</comment>
   </data>
-  <data name="UserExtended" xml:space="preserve">
+  <data name="User" xml:space="preserve">
     <value>User</value>
     <comment>Korisnik</comment>
   </data>
@@ -324,7 +324,7 @@
     <value>Discount</value>
     <comment>Popust</comment>
   </data>
-  <data name="UserExtendedList" xml:space="preserve">
+  <data name="UserList" xml:space="preserve">
     <value>Users</value>
     <comment>Korisnici</comment>
   </data>

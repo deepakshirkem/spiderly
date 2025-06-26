@@ -23,14 +23,14 @@
               <div style="display: flex; flex-direction: column; gap: 0.5rem; position: relative;">
                   <div>
                     <label>
-                      {{filter.name}}
+                      {{filter.label}}
                     </label>
                   </div>
 
-                  <p-columnFilter *ngIf="filter.filterType != null" [type]="filter.filterType" [field]="filter.filterField ?? filter.field" display="row" [placeholder]="filter.filterPlaceholder" 
-                  [showOperator]="false" [showMenu]="filter.showMatchModes" [showMatchModes]="true" [showClearButton]="false" [matchMode]="getDefaultMatchMode(filter.filterType)" [matchModeOptions]="getMatchModeOptions(filter.filterType)" 
+                  <p-columnFilter *ngIf="filter.type != null" [type]="filter.type" [field]="filter.filterField ?? filter.field" display="row" [placeholder]="filter.placeholder" 
+                  [showOperator]="false" [showMenu]="filter.showMatchModes" [showMatchModes]="true" [showClearButton]="false" [matchMode]="getDefaultMatchMode(filter.type)" [matchModeOptions]="getMatchModeOptions(filter.type)" 
                   >
-                    <ng-container *ngIf="filter.filterType == 'multiselect'">
+                    <ng-container *ngIf="filter.type == 'multiselect'">
                       <ng-template pTemplate="filter" let-value let-filter="filterCallback">
                         <p-multiSelect [ngModel]="value" [options]="filter.dropdownOrMultiselectValues" [placeholder]="t('All')" (onChange)="filter($event.value)" optionLabel="label" optionValue="code" [style]="{'width':'240px'}">
                           <ng-template let-item pTemplate="item">

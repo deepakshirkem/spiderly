@@ -293,13 +293,13 @@ namespace Spiderly.Security.Services
 
         #region User
 
-        public async Task<UserDTO> GetCurrentUserDTO()
+        public async Task<UserBaseDTO> GetCurrentUserBaseDTO()
         {
             return await _context.WithTransactionAsync(async () =>
             {
                 return await _context.DbSet<TUser>()
                     .Where(x => x.Id == _authenticationService.GetCurrentUserId())
-                    .Select(x => new UserDTO
+                    .Select(x => new UserBaseDTO
                     {
                         Id = x.Id,
                         Email = x.Email
@@ -308,18 +308,18 @@ namespace Spiderly.Security.Services
             });
         }
 
-        public async Task<List<NamebookDTO<int>>> GetRolesNamebookListForUserExtended(long userExtendedId, bool authorize = true)
+        public async Task<List<NamebookDTO<int>>> GetRolesNamebookListForUser(long userId, bool authorize = true)
         {
             return await _context.WithTransactionAsync(async () =>
             {
                 if (authorize)
                 {
-                    await _authorizationService.AuthorizeAndThrowAsync<TUser>(SecurityPermissionCodes.ReadUserExtended);
+                    await _authorizationService.AuthorizeAndThrowAsync<TUser>(SecurityPermissionCodes.ReadUser);
                 }
 
                 return await _context.DbSet<TUser>()
                     .AsNoTracking()
-                    .Where(x => x.Id == userExtendedId)
+                    .Where(x => x.Id == userId)
                     .SelectMany(x => x.Roles)
                     .Select(role => new NamebookDTO<int>
                     {

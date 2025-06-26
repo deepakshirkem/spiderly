@@ -46,7 +46,13 @@ namespace Spiderly.CLI
 
             if (args.HasArg("add-new-page"))
             {
-                await AddNewPage();
+                bool shouldGenerateDataView = false;
+                if (args.HasArg("--data-view"))
+                {
+                    shouldGenerateDataView = true;
+                }
+
+                await AddNewPage(shouldGenerateDataView);
                 return;
             }
 
@@ -229,7 +235,7 @@ namespace Spiderly.CLI
 
         #region Add New Page
 
-        private static async Task AddNewPage()
+        private static async Task AddNewPage(bool shouldGenerateDataView)
         {
             string entityName = null;
 
@@ -301,15 +307,27 @@ namespace Spiderly.CLI
                 {
                     Directory.CreateDirectory(newPageFolderPath);
 
-                    string tableTsPath = Path.Combine(newPageFolderPath, $"{kebabEntityName}-table.component.ts");
-                    string tableTsTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularTableTsTemplate(entityName);
-                    await File.WriteAllTextAsync(tableTsPath, tableTsTemplate, Encoding.UTF8);
-                    Console.WriteLine($"Table ts file successfully generated: {tableTsPath}");
+                    string listTsPath = Path.Combine(newPageFolderPath, $"{kebabEntityName}-list.component.ts");
+                    string listHtmlPath = Path.Combine(newPageFolderPath, $"{kebabEntityName}-list.component.html");
+                    string listTsTemplate;
+                    string listHtmlTemplate;
 
-                    string tableHtmlPath = Path.Combine(newPageFolderPath, $"{kebabEntityName}-table.component.html");
-                    string tableHtmlTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularTableHtmlTemplate(entityName);
-                    await File.WriteAllTextAsync(tableHtmlPath, tableHtmlTemplate, Encoding.UTF8);
-                    Console.WriteLine($"Table html file successfully generated: {tableHtmlPath}");
+                    if (shouldGenerateDataView)
+                    {
+                        listTsTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularDataViewTsTemplate(entityName);
+                        listHtmlTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularDataViewHtmlTemplate(entityName);
+                    }
+                    else
+                    {
+                        listTsTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularTableTsTemplate(entityName);
+                        listHtmlTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularTableHtmlTemplate(entityName);
+                    }
+
+                    await File.WriteAllTextAsync(listTsPath, listTsTemplate, Encoding.UTF8);
+                    Console.WriteLine($"List .ts file successfully generated: {listTsPath}");
+
+                    await File.WriteAllTextAsync(listHtmlPath, listHtmlTemplate, Encoding.UTF8);
+                    Console.WriteLine($"List .html file successfully generated: {listHtmlPath}");
 
                     string detailsTsPath = Path.Combine(newPageFolderPath, $"{kebabEntityName}-details.component.ts");
                     string detailsTsTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularDetailsTsTemplate(entityName);

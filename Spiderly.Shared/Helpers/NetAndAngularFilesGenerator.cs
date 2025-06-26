@@ -148,8 +148,8 @@ namespace Spiderly.Shared.Helpers
                                                                 {
                                                                     new SpiderlyFile { Name = "notification-details.component.html", Data = GetNotificationDetailsComponentHtmlData() },
                                                                     new SpiderlyFile { Name = "notification-details.component.ts", Data = GetNotificationDetailsComponentTsData() },
-                                                                    new SpiderlyFile { Name = "notification-table.component.html", Data = GetNotificationTableComponentHtmlData() },
-                                                                    new SpiderlyFile { Name = "notification-table.component.ts", Data = GetNotificationTableComponentTsData() },
+                                                                    new SpiderlyFile { Name = "notification-list.component.html", Data = GetNotificationTableComponentHtmlData() },
+                                                                    new SpiderlyFile { Name = "notification-list.component.ts", Data = GetNotificationTableComponentTsData() },
                                                                 }
                                                             },
                                                             new SpiderlyFolder
@@ -159,8 +159,8 @@ namespace Spiderly.Shared.Helpers
                                                                 {
                                                                     new SpiderlyFile { Name = "user-details.component.html", Data = GetUserDetailsComponentHtmlData() },
                                                                     new SpiderlyFile { Name = "user-details.component.ts", Data = GetUserDetailsComponentTsData() },
-                                                                    new SpiderlyFile { Name = "user-table.component.html", Data = GetUserTableComponentHtmlData() },
-                                                                    new SpiderlyFile { Name = "user-table.component.ts", Data = GetUserTableComponentTsData() },
+                                                                    new SpiderlyFile { Name = "user-list.component.html", Data = GetUserTableComponentHtmlData() },
+                                                                    new SpiderlyFile { Name = "user-list.component.ts", Data = GetUserTableComponentTsData() },
                                                                 }
                                                             },
                                                             new SpiderlyFolder
@@ -170,8 +170,8 @@ namespace Spiderly.Shared.Helpers
                                                                 {
                                                                     new SpiderlyFile { Name = "role-details.component.html", Data = GetRoleDetailsComponentHtmlData() },
                                                                     new SpiderlyFile { Name = "role-details.component.ts", Data = GetRoleDetailsComponentTsData() },
-                                                                    new SpiderlyFile { Name = "role-table.component.html", Data = GetRoleTableComponentHtmlData() },
-                                                                    new SpiderlyFile { Name = "role-table.component.ts", Data = GetRoleTableComponentTsData() },
+                                                                    new SpiderlyFile { Name = "role-list.component.html", Data = GetRoleTableComponentHtmlData() },
+                                                                    new SpiderlyFile { Name = "role-list.component.ts", Data = GetRoleTableComponentTsData() },
                                                                 }
                                                             },
                                                         },
@@ -205,11 +205,11 @@ namespace Spiderly.Shared.Helpers
                                                     },
                                                     new SpiderlyFolder
                                                     {
-                                                        Name = "notification",
+                                                        Name = "notifications-view",
                                                         Files =
                                                         {
-                                                            new SpiderlyFile { Name = "notification.component.html", Data = GetClientNotificationComponentHtmlData() },
-                                                            new SpiderlyFile { Name = "notification.component.ts", Data = GetClientNotificationComponentTsData() },
+                                                            new SpiderlyFile { Name = "notifications-view.component.html", Data = GetNotificationsViewComponentHtmlData() },
+                                                            new SpiderlyFile { Name = "notifications-view.component.ts", Data = GetNotificationsViewComponentTsData() },
                                                         }
                                                     },
                                                 }
@@ -324,7 +324,7 @@ namespace Spiderly.Shared.Helpers
                                         Files =
                                         {
                                             new SpiderlyFile { Name = "Notification.cs", Data = GetNotificationCsData(appName) },
-                                            new SpiderlyFile { Name = "UserExtended.cs", Data = GetUserExtendedCsData(appName) },
+                                            new SpiderlyFile { Name = "User.cs", Data = GetUserCsData(appName) },
                                             new SpiderlyFile { Name = "UserNotification.cs", Data = GetUserNotificationCsData(appName) },
                                         }
                                     },
@@ -418,7 +418,7 @@ namespace Spiderly.Shared.Helpers
                                         {
                                             new SpiderlyFile { Name = "NotificationController.cs", Data = GetNotificationControllerCsData(appName) },
                                             new SpiderlyFile { Name = "SecurityController.cs", Data = GetSecurityControllerCsData(appName) },
-                                            new SpiderlyFile { Name = "UserExtendedController.cs", Data = GetUserExtendedControllerCsData(appName) },
+                                            new SpiderlyFile { Name = "UserController.cs", Data = GetUserControllerCsData(appName) },
                                         }
                                     },
                                     new SpiderlyFolder
@@ -626,18 +626,18 @@ import { {{entityName}} } from 'src/app/business/entities/business-entities.gene
 import { Column, SpiderlyDataTableComponent } from 'spiderly';
 
 @Component({
-    selector: '{{kebabEntityName}}-table',
-    templateUrl: './{{kebabEntityName}}-table.component.html',
+    selector: '{{kebabEntityName}}-list',
+    templateUrl: './{{kebabEntityName}}-list.component.html',
     imports: [
         TranslocoDirective,
         SpiderlyDataTableComponent
     ]
 })
-export class {{entityName}}TableComponent implements OnInit {
+export class {{entityName}}ListComponent implements OnInit {
     cols: Column<{{entityName}}>[];
 
-    get{{entityName}}TableDataObservableMethod = this.apiService.get{{entityName}}TableData;
-    export{{entityName}}TableDataToExcelObservableMethod = this.apiService.export{{entityName}}TableDataToExcel;
+    getPaginated{{entityName}}ListObservableMethod = this.apiService.getPaginated{{entityName}}List;
+    export{{entityName}}ListToExcelObservableMethod = this.apiService.export{{entityName}}ListToExcel;
     delete{{entityName}}ObservableMethod = this.apiService.delete{{entityName}};
 
     constructor(
@@ -665,9 +665,70 @@ export class {{entityName}}TableComponent implements OnInit {
 
     <spiderly-data-table [tableTitle]="t('{{entityName}}List')" 
     [cols]="cols" 
-    [getTableDataObservableMethod]="get{{entityName}}TableDataObservableMethod" 
-    [exportTableDataToExcelObservableMethod]="export{{entityName}}TableDataToExcelObservableMethod"
+    [getPaginatedListObservableMethod]="getPaginated{{entityName}}ListObservableMethod" 
+    [exportListToExcelObservableMethod]="export{{entityName}}ListToExcelObservableMethod"
     [deleteItemFromTableObservableMethod]="delete{{entityName}}ObservableMethod"
+    [showAddButton]="true"
+    ></spiderly-data-table>
+
+</ng-container>
+""";
+        }
+
+        public static string GetSpiderlyAngularDataViewTsTemplate(string entityName)
+        {
+            string kebabEntityName = entityName.ToKebabCase();
+
+            return $$"""
+import { ApiService } from 'src/app/business/services/api/api.service';
+import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
+import { Component, OnInit } from '@angular/core';
+import { {{entityName}} } from 'src/app/business/entities/business-entities.generated';
+import { Column, SpiderlyDataDataViewComponent } from 'spiderly';
+
+@Component({
+    selector: '{{kebabEntityName}}-list',
+    templateUrl: './{{kebabEntityName}}-list.component.html',
+    imports: [
+        TranslocoDirective,
+        SpiderlyDataDataViewComponent
+    ]
+})
+export class {{entityName}}DataViewComponent implements OnInit {
+    cols: Column<{{entityName}}>[];
+
+    getPaginated{{entityName}}ListObservableMethod = this.apiService.getPaginated{{entityName}}List;
+    export{{entityName}}ListToExcelObservableMethod = this.apiService.export{{entityName}}ListToExcel;
+    delete{{entityName}}ObservableMethod = this.apiService.delete{{entityName}};
+
+    constructor(
+        private apiService: ApiService,
+        private translocoService: TranslocoService,
+    ) { }
+
+    ngOnInit(){
+        this.cols = [
+            {name: this.translocoService.translate('Id'), filterType: 'numeric', field: 'id'},
+            {actions:[
+                {name: this.translocoService.translate('Details'), field: 'Details'},
+                {name:  this.translocoService.translate('Delete'), field: 'Delete'},
+            ]},
+        ]
+    }
+}
+""";
+        }
+
+        public static string GetSpiderlyAngularDataViewHtmlTemplate(string entityName)
+        {
+            return $$"""
+<ng-container *transloco="let t">
+
+    <spiderly-data-table [tableTitle]="t('{{entityName}}List')" 
+    [cols]="cols" 
+    [getPaginatedListObservableMethod]="getPaginated{{entityName}}ListObservableMethod" 
+    [exportListToExcelObservableMethod]="export{{entityName}}ListToExcelObservableMethod"
+    [deleteItemFromDataViewObservableMethod]="delete{{entityName}}ObservableMethod"
     [showAddButton]="true"
     ></spiderly-data-table>
 
@@ -793,8 +854,8 @@ export class NotificationDetailsComponent extends BaseFormCopy implements OnInit
     <spiderly-data-table 
     [tableTitle]="t('NotificationList')" 
     [cols]="cols" 
-    [getTableDataObservableMethod]="getNotificationTableDataObservableMethod" 
-    [exportTableDataToExcelObservableMethod]="exportNotificationTableDataToExcelObservableMethod"
+    [getPaginatedListObservableMethod]="getPaginatedNotificationListObservableMethod" 
+    [exportListToExcelObservableMethod]="exportNotificationListToExcelObservableMethod"
     [deleteItemFromTableObservableMethod]="deleteNotificationObservableMethod"
     >
     </spiderly-data-table>
@@ -812,18 +873,18 @@ import { ApiService } from 'src/app/business/services/api/api.service';
 import { Notification } from 'src/app/business/entities/business-entities.generated';
 
 @Component({
-    selector: 'notification-table',
-    templateUrl: './notification-table.component.html',
+    selector: 'notification-list',
+    templateUrl: './notification-list.component.html',
     imports: [
         TranslocoDirective,
         SpiderlyDataTableComponent
     ]
 })
-export class NotificationTableComponent implements OnInit {
+export class NotificationListComponent implements OnInit {
     cols: Column<Notification>[];
 
-    getNotificationTableDataObservableMethod = this.apiService.getNotificationTableData;
-    exportNotificationTableDataToExcelObservableMethod = this.apiService.exportNotificationTableDataToExcel;
+    getPaginatedNotificationListObservableMethod = this.apiService.getPaginatedNotificationList;
+    exportNotificationListToExcelObservableMethod = this.apiService.exportNotificationListToExcel;
     deleteNotificationObservableMethod = this.apiService.deleteNotification;
 
     constructor(
@@ -910,8 +971,8 @@ export class RoleDetailsComponent extends BaseFormCopy implements OnInit {
     <spiderly-data-table 
     [tableTitle]="t('RoleList')" 
     [cols]="cols" 
-    [getTableDataObservableMethod]="getRoleTableDataObservableMethod" 
-    [exportTableDataToExcelObservableMethod]="exportRoleTableDataToExcelObservableMethod"
+    [getPaginatedListObservableMethod]="getPaginatedRoleListObservableMethod" 
+    [exportListToExcelObservableMethod]="exportRoleListToExcelObservableMethod"
     [deleteItemFromTableObservableMethod]="deleteRoleObservableMethod"
     ></spiderly-data-table>
 </ng-container>
@@ -927,18 +988,18 @@ import { ApiService } from 'src/app/business/services/api/api.service';
 import { Column, Role, SpiderlyDataTableComponent } from 'spiderly';
 
 @Component({
-    selector: 'role-table',
-    templateUrl: './role-table.component.html',
+    selector: 'role-list',
+    templateUrl: './role-list.component.html',
     imports: [
         TranslocoDirective,
         SpiderlyDataTableComponent
     ]
 })
-export class RoleTableComponent implements OnInit {
+export class RoleListComponent implements OnInit {
     cols: Column<Role>[];
 
-    getRoleTableDataObservableMethod = this.apiService.getRoleTableData;
-    exportRoleTableDataToExcelObservableMethod = this.apiService.exportRoleTableDataToExcel;
+    getPaginatedRoleListObservableMethod = this.apiService.getPaginatedRoleList;
+    exportRoleListToExcelObservableMethod = this.apiService.exportRoleListToExcel;
     deleteRoleObservableMethod = this.apiService.deleteRole;
 
     constructor(
@@ -966,13 +1027,13 @@ export class RoleTableComponent implements OnInit {
             return $$"""
 <ng-container *transloco="let t">
     <user-extended-base-details
-    [panelTitle]="userExtendedFormGroup.getRawValue().email ?? null"
+    [panelTitle]="userFormGroup.getRawValue().email ?? null"
     panelIcon="pi pi-user"
     [formGroup]="formGroup" 
-    [userExtendedFormGroup]="userExtendedFormGroup" 
+    [userFormGroup]="userFormGroup" 
     (onSave)="onSave()" 
-    [showIsDisabledForUserExtended]="showIsDisabledControl"
-    [showHasLoggedInWithExternalProviderForUserExtended]="showHasLoggedInWithExternalProvider"
+    [showIsDisabledForUser]="showIsDisabledControl"
+    [showHasLoggedInWithExternalProviderForUser]="showHasLoggedInWithExternalProvider"
     [showReturnButton]="false"
     [authorizedForSaveObservable]="authorizedForSaveObservable"
     (onIsAuthorizedForSaveChange)="isAuthorizedForSaveChange($event)"
@@ -988,12 +1049,12 @@ import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, KeyValueDiffers, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
-import { UserExtended } from 'src/app/business/entities/business-entities.generated';
+import { User } from 'src/app/business/entities/business-entities.generated';
 import { BaseFormCopy, SpiderlyFormGroup, SpiderlyMessageService, BaseFormService, IsAuthorizedForSaveEvent, SpiderlyControlsModule, SpiderlyPanelsModule } from 'spiderly';
 import { AuthService } from 'src/app/business/services/auth/auth.service';
 import { combineLatest, delay, map, Observable } from 'rxjs';
 import { BusinessPermissionCodes } from 'src/app/business/enums/business-enums.generated';
-import { UserExtendedBaseDetailsComponent } from 'src/app/business/components/base-details/business-base-details.generated';
+import { UserBaseDetailsComponent } from 'src/app/business/components/base-details/business-base-details.generated';
 
 @Component({
     selector: 'user-details',
@@ -1002,11 +1063,11 @@ import { UserExtendedBaseDetailsComponent } from 'src/app/business/components/ba
         TranslocoDirective,
         SpiderlyPanelsModule,
         SpiderlyControlsModule,
-        UserExtendedBaseDetailsComponent,
+        UserBaseDetailsComponent,
     ]
 })
 export class UserDetailsComponent extends BaseFormCopy implements OnInit {
-    userExtendedFormGroup = new SpiderlyFormGroup<UserExtended>({});
+    userFormGroup = new SpiderlyFormGroup<User>({});
 
     showIsDisabledControl: boolean = false;
     showHasLoggedInWithExternalProvider: boolean = false;
@@ -1048,18 +1109,18 @@ export class UserDetailsComponent extends BaseFormCopy implements OnInit {
     }
 
     showIsDisabledAndExternalLoggedInControlsForPermissions = (currentUserPermissionCodes: string[]) => {
-        return currentUserPermissionCodes.includes(BusinessPermissionCodes.ReadUserExtended) ||
-               currentUserPermissionCodes.includes(BusinessPermissionCodes.UpdateUserExtended);
+        return currentUserPermissionCodes.includes(BusinessPermissionCodes.ReadUser) ||
+               currentUserPermissionCodes.includes(BusinessPermissionCodes.UpdateUser);
     }
 
     isCurrentUserPage = (currentUserId: number) => {
-        return currentUserId === this.userExtendedFormGroup.getRawValue().id;
+        return currentUserId === this.userFormGroup.getRawValue().id;
     }
 
     isAuthorizedForSaveChange = (event: IsAuthorizedForSaveEvent) => {
         this.isAuthorizedForSave = event.isAuthorizedForSave;
 
-        this.userExtendedFormGroup.controls.hasLoggedInWithExternalProvider.disable();
+        this.userFormGroup.controls.hasLoggedInWithExternalProvider.disable();
     }
 
     override onBeforeSave = (): void => {
@@ -1074,10 +1135,11 @@ export class UserDetailsComponent extends BaseFormCopy implements OnInit {
         {
             return $$"""
 <ng-container *transloco="let t">
-    <spiderly-data-table [tableTitle]="t('UserList')" 
+    <spiderly-data-table 
+    [tableTitle]="t('UserList')" 
     [cols]="cols" 
-    [getTableDataObservableMethod]="getUserTableDataObservableMethod" 
-    [exportTableDataToExcelObservableMethod]="exportUserTableDataToExcelObservableMethod"
+    [getPaginatedListObservableMethod]="getPaginatedUserListObservableMethod" 
+    [exportListToExcelObservableMethod]="exportUserListToExcelObservableMethod"
     [deleteItemFromTableObservableMethod]="deleteUserObservableMethod"
     [showAddButton]="false"
     ></spiderly-data-table>
@@ -1091,23 +1153,23 @@ export class UserDetailsComponent extends BaseFormCopy implements OnInit {
 import { ApiService } from '../../../business/services/api/api.service';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { Component, OnInit } from '@angular/core';
-import { UserExtended } from 'src/app/business/entities/business-entities.generated';
+import { User } from 'src/app/business/entities/business-entities.generated';
 import { Column, SpiderlyDataTableComponent } from 'spiderly';
 
 @Component({
-    selector: 'user-table',
-    templateUrl: './user-table.component.html',
+    selector: 'user-list',
+    templateUrl: './user-list.component.html',
     imports: [
         TranslocoDirective,
         SpiderlyDataTableComponent,
     ]
 })
-export class UserTableComponent implements OnInit {
-    cols: Column<UserExtended>[];
+export class UserListComponent implements OnInit {
+    cols: Column<User>[];
 
-    getUserTableDataObservableMethod = this.apiService.getUserExtendedTableData;
-    exportUserTableDataToExcelObservableMethod = this.apiService.exportUserExtendedTableDataToExcel;
-    deleteUserObservableMethod = this.apiService.deleteUserExtended;
+    getPaginatedUserListObservableMethod = this.apiService.getPaginatedUserList;
+    exportUserListToExcelObservableMethod = this.apiService.exportUserListToExcel;
+    deleteUserObservableMethod = this.apiService.deleteUser;
 
     constructor(
         private apiService: ApiService,
@@ -1414,7 +1476,7 @@ export class UserAgreementComponent implements OnInit {
 """;
         }
 
-        private static string GetClientNotificationComponentHtmlData()
+        private static string GetNotificationsViewComponentHtmlData()
         {
             return $$$"""
 <ng-container *transloco="let t">
@@ -1451,8 +1513,8 @@ export class UserAgreementComponent implements OnInit {
     </div>
     <p-paginator
       (onPageChange)="onLazyLoad($event)"
-      [first]="tableFilter.first"
-      [rows]="tableFilter.rows" 
+      [first]="filter.first"
+      [rows]="filter.rows" 
       [totalRecords]="currentUserNotifications?.totalRecords">
     </p-paginator>
     <div class="card-overflow-icon">
@@ -1463,7 +1525,7 @@ export class UserAgreementComponent implements OnInit {
 """;
         }
 
-        private static string GetClientNotificationComponentTsData()
+        private static string GetNotificationsViewComponentTsData()
         {
             return $$"""
 import { LayoutService } from './../../business/services/layout/layout.service';
@@ -1474,24 +1536,24 @@ import { PaginatorModule, PaginatorState } from 'primeng/paginator';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { Notification } from 'src/app/business/entities/business-entities.generated';
 import { Menu, MenuModule } from 'primeng/menu';
-import { TableResponse, TableFilter, TableFilterContext, SpiderlyMessageService } from 'spiderly';
+import { PaginatedResult, Filter, SpiderlyMessageService } from 'spiderly';
 
 @Component({
-  templateUrl: './notification.component.html',
+  templateUrl: './notifications-view.component.html',
   imports: [
     TranslocoDirective,
     MenuModule,
     PaginatorModule
   ],
 })
-export class NotificationComponent implements OnInit {
-  currentUserNotifications: TableResponse<Notification>;
+export class NotificationsViewComponent implements OnInit {
+  currentUserNotifications: PaginatedResult<Notification>;
 
   crudMenu: MenuItem[] = [];
   @ViewChild('menu') menu: Menu;
   lastMenuToggledNotification: Notification;
 
-  tableFilter: TableFilter<Notification> = new TableFilter({
+  filter = new Filter<Notification>({
     first: 0,
     rows: 10,
   });
@@ -1514,14 +1576,14 @@ export class NotificationComponent implements OnInit {
   }
 
   onLazyLoad(event: PaginatorState){
-    this.tableFilter.first = event.first;
-    this.tableFilter.rows = event.rows;
+    this.filter.first = event.first;
+    this.filter.rows = event.rows;
     this.getNotificationsForCurrentUser();
   }
 
   getNotificationsForCurrentUser(){
-    this.apiService.getNotificationsForCurrentUser(this.tableFilter).subscribe((res) => {
-      this.currentUserNotifications = res;
+    this.apiService.getNotificationsForCurrentUser(this.filter).subscribe((notifications) => {
+      this.currentUserNotifications = notifications;
     });
   }
 
@@ -1580,7 +1642,7 @@ export const routes: Routes = [
             },
             {
                 path: 'administration/users',
-                loadComponent: () => import('./pages/administration/user/user-table.component').then(c => c.UserTableComponent),
+                loadComponent: () => import('./pages/administration/user/user-list.component').then(c => c.UserListComponent),
                 canActivate: [AuthGuard],
             },
             {
@@ -1590,7 +1652,7 @@ export const routes: Routes = [
             },
             {
                 path: 'administration/roles',
-                loadComponent: () => import('./pages/administration/role/role-table.component').then(c => c.RoleTableComponent),
+                loadComponent: () => import('./pages/administration/role/role-list.component').then(c => c.RoleListComponent),
                 canActivate: [AuthGuard],
             },
             {
@@ -1600,7 +1662,7 @@ export const routes: Routes = [
             },
             {
                 path: 'administration/notifications',
-                loadComponent: () => import('./pages/administration/notification/notification-table.component').then(c => c.NotificationTableComponent),
+                loadComponent: () => import('./pages/administration/notification/notification-list.component').then(c => c.NotificationListComponent),
                 canActivate: [AuthGuard],
             },
             {
@@ -1610,7 +1672,7 @@ export const routes: Routes = [
             },
             { 
                 path: 'notifications',
-                loadComponent: () => import('./pages/notification/notification.component').then(c => c.NotificationComponent),
+                loadComponent: () => import('./pages/notifications-view/notifications-view.component').then(c => c.NotificationsViewComponent),
                 canActivate: [AuthGuard]
             },
         ],
@@ -2386,7 +2448,7 @@ namespace {{appName}}.Business.Entities
         public virtual Notification Notification { get; set; }
 
         [M2MWithMany(nameof(User.Notifications))]
-        public virtual UserExtended User { get; set; }
+        public virtual User User { get; set; }
 
         public bool IsMarkedAsRead { get; set; }
     }
@@ -2414,7 +2476,7 @@ namespace {{appName}}.Business.Enums
 """;
         }
 
-        private static string GetUserExtendedCsData(string appName)
+        private static string GetUserCsData(string appName)
         {
             return $$"""
 using Microsoft.EntityFrameworkCore;
@@ -2430,7 +2492,7 @@ using System.ComponentModel.DataAnnotations;
 namespace {{appName}}.Business.Entities
 {
     [Index(nameof(Email), IsUnique = true)]
-    public class UserExtended : BusinessObject<long>, IUser
+    public class User : BusinessObject<long>, IUser
     {
         [UIDoNotGenerate]
         [UIControlWidth("col-12")]
@@ -2523,9 +2585,9 @@ namespace {{appName}}.WebAPI.Controllers
 
         [HttpPost]
         [AuthGuard]
-        public async Task<TableResponseDTO<NotificationDTO>> GetNotificationsForCurrentUser(TableFilterDTO tableFilterDTO)
+        public async Task<PaginatedResultDTO<NotificationDTO>> GetNotificationsForCurrentUser(FilterDTO filterDTO)
         {
-            return await _{{appName.FirstCharToLower()}}BusinessService.GetNotificationsForCurrentUser(tableFilterDTO);
+            return await _{{appName.FirstCharToLower()}}BusinessService.GetNotificationsForCurrentUser(filterDTO);
         }
 
     }
@@ -2556,17 +2618,17 @@ namespace {{appName}}.WebAPI.Controllers
 {
     [ApiController]
     [Route("/api/[controller]/[action]")]
-    public class SecurityController : SecurityBaseController<UserExtended>
+    public class SecurityController : SecurityBaseController<User>
     {
         private readonly ILogger<SecurityController> _logger;
-        private readonly SecurityBusinessService<UserExtended> _securityBusinessService;
+        private readonly SecurityBusinessService<User> _securityBusinessService;
         private readonly IApplicationDbContext _context;
         private readonly {{appName}}BusinessService _{{appName.FirstCharToLower()}}BusinessService;
 
 
         public SecurityController(
             ILogger<SecurityController> logger, 
-            SecurityBusinessService<UserExtended> securityBusinessService, 
+            SecurityBusinessService<User> securityBusinessService, 
             IJwtAuthManager jwtAuthManagerService, 
             IApplicationDbContext context, 
             AuthenticationService authenticationService,
@@ -2589,7 +2651,7 @@ namespace {{appName}}.WebAPI.Controllers
 """;
         }
 
-        private static string GetUserExtendedControllerCsData(string appName)
+        private static string GetUserControllerCsData(string appName)
         {
             return $$"""
 using Microsoft.AspNetCore.Mvc;
@@ -2607,13 +2669,13 @@ namespace {{appName}}.WebAPI.Controllers
 {
     [ApiController]
     [Route("/api/[controller]/[action]")]
-    public class UserExtendedController : UserExtendedBaseController
+    public class UserController : UserBaseController
     {
         private readonly IApplicationDbContext _context;
         private readonly {{appName}}BusinessService _{{appName.FirstCharToLower()}}BusinessService;
         private readonly AuthenticationService _authenticationService;
 
-        public UserExtendedController(
+        public UserController(
             IApplicationDbContext context, 
             {{appName}}BusinessService {{appName.FirstCharToLower()}}BusinessService, 
             AuthenticationService authenticationService
@@ -2628,10 +2690,10 @@ namespace {{appName}}.WebAPI.Controllers
         [HttpGet]
         [AuthGuard]
         [SkipSpinner]
-        public async Task<UserExtendedDTO> GetCurrentUserExtended()
+        public async Task<UserDTO> GetCurrentUser()
         {
             long userId = _authenticationService.GetCurrentUserId();
-            return await _{{appName.FirstCharToLower()}}BusinessService.GetUserExtendedDTO(userId, false); // Don't need to authorize because he is current user
+            return await _{{appName.FirstCharToLower()}}BusinessService.GetUserDTO(userId, false); // Don't need to authorize because he is current user
         }
 
     }
@@ -2653,7 +2715,7 @@ using {{appName}}.Business.DTO;
 
 namespace {{appName}}.Business.Entities
 {
-    public class Notification : BusinessObject<long>, INotification<UserExtended>
+    public class Notification : BusinessObject<long>, INotification<User>
     {
         [UIControlWidth("col-12")]
         [DisplayName]
@@ -2671,11 +2733,11 @@ namespace {{appName}}.Business.Entities
         public string EmailBody { get; set; }
 
         #region UITableColumn
-        [UITableColumn(nameof(UserExtendedDTO.Email))]
-        [UITableColumn(nameof(UserExtendedDTO.CreatedAt))]
+        [UITableColumn(nameof(UserDTO.Email))]
+        [UITableColumn(nameof(UserDTO.CreatedAt))]
         #endregion
         [SimpleManyToManyTableLazyLoad]
-        public virtual List<UserExtended> Recipients { get; } = new(); // M2M
+        public virtual List<User> Recipients { get; } = new(); // M2M
     }
 }
 """;
@@ -2722,7 +2784,7 @@ using Spiderly.Infrastructure;
 
 namespace {{appName}}.Infrastructure
 {
-    public partial class {{appName}}ApplicationDbContext : ApplicationDbContext<UserExtended> // https://stackoverflow.com/questions/41829229/how-do-i-implement-dbcontext-inheritance-for-multiple-databases-in-ef7-net-co
+    public partial class {{appName}}ApplicationDbContext : ApplicationDbContext<User> // https://stackoverflow.com/questions/41829229/how-do-i-implement-dbcontext-inheritance-for-multiple-databases-in-ef7-net-co
     {
         public {{appName}}ApplicationDbContext(DbContextOptions<{{appName}}ApplicationDbContext> options)
         : base(options)
@@ -2801,9 +2863,9 @@ begin transaction;
 
 use {{appName}}
 
-insert into Permission(Name, Description, Code) values(N'View users', null, N'ReadUserExtended');
-insert into Permission(Name, Description, Code) values(N'Edit existing users', null, N'UpdateUserExtended');
-insert into Permission(Name, Description, Code) values(N'Delete users', null, N'DeleteUserExtended');
+insert into Permission(Name, Description, Code) values(N'View users', null, N'ReadUser');
+insert into Permission(Name, Description, Code) values(N'Edit existing users', null, N'UpdateUser');
+insert into Permission(Name, Description, Code) values(N'Delete users', null, N'DeleteUser');
 insert into Permission(Name, Description, Code) values(N'View notifications', null, N'ReadNotification');
 insert into Permission(Name, Description, Code) values(N'Edit existing notifications', null, N'UpdateNotification');
 insert into Permission(Name, Description, Code) values(N'Add new notifications', null, N'InsertNotification');
@@ -3211,10 +3273,10 @@ namespace {{appName}}.WebAPI.DI
 
             registry.Register<AuthenticationService>();
             registry.Register<AuthorizationService>();
-            registry.Register<SecurityBusinessService<UserExtended>>();
-            registry.Register<Spiderly.Security.Services.BusinessServiceGenerated<UserExtended>>();
-            registry.Register<Spiderly.Security.Services.AuthorizationBusinessService<UserExtended>>();
-            registry.Register<Spiderly.Security.Services.AuthorizationBusinessServiceGenerated<UserExtended>>();
+            registry.Register<SecurityBusinessService<User>>();
+            registry.Register<Spiderly.Security.Services.BusinessServiceGenerated<User>>();
+            registry.Register<Spiderly.Security.Services.AuthorizationBusinessService<User>>();
+            registry.Register<Spiderly.Security.Services.AuthorizationBusinessServiceGenerated<User>>();
             registry.Register<ExcelService>();
             registry.Register<EmailingService>();
             registry.Register<IFileManager, DiskStorageService>();
@@ -3464,37 +3526,37 @@ namespace {{appName}}.Business.Services
             _authenticationService = authenticationService;
         }
 
-        #region UserExtended
+        #region User
 
-        public override async Task AuthorizeUserExtendedReadAndThrow(long? userExtendedId)
+        public override async Task AuthorizeUserReadAndThrow(long? userId)
         {
             await _context.WithTransactionAsync(async () =>
             {
-                bool hasAdminReadPermission = await IsAuthorizedAsync<UserExtended>(BusinessPermissionCodes.ReadUserExtended);
-                bool isCurrentUser = _authenticationService.GetCurrentUserId() == userExtendedId;
+                bool hasAdminReadPermission = await IsAuthorizedAsync<User>(BusinessPermissionCodes.ReadUser);
+                bool isCurrentUser = _authenticationService.GetCurrentUserId() == userId;
 
                 if (isCurrentUser == false && hasAdminReadPermission == false)
                     throw new UnauthorizedException();
             });
         }
 
-        public override async Task AuthorizeUserExtendedUpdateAndThrow(UserExtendedDTO userExtendedDTO)
+        public override async Task AuthorizeUserUpdateAndThrow(UserDTO userDTO)
         {
             await _context.WithTransactionAsync(async () =>
             {
-                bool hasAdminUpdatePermission = await IsAuthorizedAsync<UserExtended>(BusinessPermissionCodes.UpdateUserExtended);
+                bool hasAdminUpdatePermission = await IsAuthorizedAsync<User>(BusinessPermissionCodes.UpdateUser);
                 if (hasAdminUpdatePermission)
                     return;
 
                 long currentUserId = _authenticationService.GetCurrentUserId();
-                if (currentUserId != userExtendedDTO.Id)
+                if (currentUserId != userDTO.Id)
                     throw new UnauthorizedException();
 
-                UserExtended userExtended = await GetInstanceAsync<UserExtended, long>(userExtendedDTO.Id, null);
+                User user = await GetInstanceAsync<User, long>(userDTO.Id, null);
 
                 if (
-                    userExtendedDTO.IsDisabled != userExtended.IsDisabled ||
-                    userExtendedDTO.HasLoggedInWithExternalProvider != userExtended.HasLoggedInWithExternalProvider
+                    userDTO.IsDisabled != user.IsDisabled ||
+                    userDTO.HasLoggedInWithExternalProvider != user.HasLoggedInWithExternalProvider
                 )
                 {
                     throw new UnauthorizedException();
@@ -3539,14 +3601,14 @@ namespace {{appName}}.Business.Services
         private readonly IApplicationDbContext _context;
         private readonly {{appName}}.Business.Services.AuthorizationBusinessService _authorizationService;
         private readonly AuthenticationService _authenticationService;
-        private readonly SecurityBusinessService<UserExtended> _securityBusinessService;
+        private readonly SecurityBusinessService<User> _securityBusinessService;
         private readonly EmailingService _emailingService;
 
         public {{appName}}BusinessService(
             IApplicationDbContext context, 
             ExcelService excelService, 
             {{appName}}.Business.Services.AuthorizationBusinessService authorizationService, 
-            SecurityBusinessService<UserExtended> securityBusinessService, 
+            SecurityBusinessService<User> securityBusinessService, 
             AuthenticationService authenticationService, 
             EmailingService emailingService,
             IFileManager fileManager
@@ -3565,18 +3627,18 @@ namespace {{appName}}.Business.Services
         /// <summary>
         /// IsDisabled is handled inside authorization service
         /// </summary>
-        protected override async Task OnBeforeSaveUserExtendedAndReturnSaveBodyDTO(UserExtendedSaveBodyDTO userExtendedSaveBodyDTO)
+        protected override async Task OnBeforeSaveUserAndReturnSaveBodyDTO(UserSaveBodyDTO userSaveBodyDTO)
         {
             await _context.WithTransactionAsync(async () =>
             {
-                if (userExtendedSaveBodyDTO.UserExtendedDTO.Id <= 0)
+                if (userSaveBodyDTO.UserDTO.Id <= 0)
                     throw new HackerException("You can't add new user.");
 
-                UserExtended userExtended = await GetInstanceAsync<UserExtended, long>(userExtendedSaveBodyDTO.UserExtendedDTO.Id, userExtendedSaveBodyDTO.UserExtendedDTO.Version);
+                User user = await GetInstanceAsync<User, long>(userSaveBodyDTO.UserDTO.Id, userSaveBodyDTO.UserDTO.Version);
 
-                if (userExtendedSaveBodyDTO.UserExtendedDTO.Email != userExtended.Email ||
-                    userExtendedSaveBodyDTO.UserExtendedDTO.HasLoggedInWithExternalProvider != userExtended.HasLoggedInWithExternalProvider
-                //userExtendedSaveBodyDTO.UserExtendedDTO.AccessedTheSystem != userExtended.AccessedTheSystem
+                if (userSaveBodyDTO.UserDTO.Email != user.Email ||
+                    userSaveBodyDTO.UserDTO.HasLoggedInWithExternalProvider != user.HasLoggedInWithExternalProvider
+                //userSaveBodyDTO.UserDTO.AccessedTheSystem != user.AccessedTheSystem
                 )
                 {
                     throw new HackerException("You can't change Email, HasLoggedInWithExternalProvider nor AccessedTheSystem from the main UI form.");
@@ -3592,7 +3654,7 @@ namespace {{appName}}.Business.Services
         {
             await _context.WithTransactionAsync(async () =>
             {
-                await _authorizationService.AuthorizeAndThrowAsync<UserExtended>(BusinessPermissionCodes.UpdateNotification);
+                await _authorizationService.AuthorizeAndThrowAsync<User>(BusinessPermissionCodes.UpdateNotification);
 
                 // Checking version because if the user didn't save and some other user changed the version, he will send emails to wrong users
                 Notification notification = await GetInstanceAsync<Notification, long>(notificationId, notificationVersion);
@@ -3669,9 +3731,9 @@ namespace {{appName}}.Business.Services
             });
         }
 
-        public async Task<TableResponseDTO<NotificationDTO>> GetNotificationsForCurrentUser(TableFilterDTO tableFilterDTO)
+        public async Task<PaginatedResultDTO<NotificationDTO>> GetNotificationsForCurrentUser(FilterDTO filterDTO)
         {
-            TableResponseDTO<NotificationDTO> result = new();
+            PaginatedResultDTO<NotificationDTO> result = new();
             long currentUserId = _authenticationService.GetCurrentUserId(); // Not doing user.Notifications, because he could have a lot of them.
 
             await _context.WithTransactionAsync(async () =>
@@ -3688,8 +3750,8 @@ namespace {{appName}}.Business.Services
                 int count = await notificationUsersQuery.CountAsync();
 
                 var notificationUsers = await notificationUsersQuery
-                    .Skip(tableFilterDTO.First)
-                    .Take(tableFilterDTO.Rows)
+                    .Skip(filterDTO.First)
+                    .Take(filterDTO.Rows)
                     .ToListAsync();
 
                 List<NotificationDTO> notificationsDTO = new();
@@ -4354,7 +4416,7 @@ export const ThemePreset = definePreset(Aura, {
     "SelectedIds": "Izabrani",
     "UnselectedIds": "Odčekirani",
     "IsAllSelected": "Sve je izabrano",
-    "UserExtendedDTO": "/",
+    "UserDTO": "/",
     "SelectedRoleIds": "/",
     "Price": "Cena",
     "Category": "Kategorija",
@@ -4374,7 +4436,7 @@ export const ThemePreset = definePreset(Aura, {
     "BirthDate": "Datum rođenja",
     "Gender": "Pol",
     "Notification": "Notifikacija",
-    "UserExtended": "Korisnik",
+    "User": "Korisnik",
     "Brand": "Brend",
     "NotificationSaveBody": "/",
     "QrCode": "QR kod",
@@ -4652,7 +4714,7 @@ export const ThemePreset = definePreset(Aura, {
   "PartnerNotificationDTO": "Notification",
   "PartnerRoleDTO": "Role",
   "SelectedPartnerUserIds": "/",
-  "UserExtendedDTO": "/",
+  "UserDTO": "/",
   "SelectedRoleIds": "/",
   "PartnerUserDTO": "/",
   "SelectedPartnerRoleIds": "/",
@@ -4692,7 +4754,7 @@ export const ThemePreset = definePreset(Aura, {
   "Notification": "Notification",
   "PartnerUser": "User",
   "SegmentationItem": "Segmentation item",
-  "UserExtended": "User",
+  "User": "User",
   "Brand": "Brand",
   "MergedPartnerUser": "User",
   "NotificationSaveBody": "/",
@@ -4701,7 +4763,7 @@ export const ThemePreset = definePreset(Aura, {
   "PartnerUserSaveBody": "/",
   "QrCode": "QR Code",
   "SegmentationSaveBody": "/",
-  "UserExtendedSaveBody": "/",
+  "UserSaveBody": "/",
   "NotificationUser": "/",
   "PartnerNotification": "Notification",
   "PartnerNotificationPartnerUser": "/",
@@ -5047,7 +5109,7 @@ export class LayoutComponent {
                         visible: true,
                         hasPermission: (permissionCodes: string[]): boolean => { 
                             return (
-                                permissionCodes?.includes(BusinessPermissionCodes.ReadUserExtended) ||
+                                permissionCodes?.includes(BusinessPermissionCodes.ReadUser) ||
                                 permissionCodes?.includes(SecurityPermissionCodes.ReadRole) ||
                                 permissionCodes?.includes(BusinessPermissionCodes.ReadNotification)
                             )
@@ -5059,7 +5121,7 @@ export class LayoutComponent {
                                 routerLink: [`/${this.config.administrationSlug}/users`],
                                 hasPermission: (permissionCodes: string[]): boolean => { 
                                     return (
-                                        permissionCodes?.includes(BusinessPermissionCodes.ReadUserExtended)
+                                        permissionCodes?.includes(BusinessPermissionCodes.ReadUser)
                                     )
                                 },
                                 visible: true,

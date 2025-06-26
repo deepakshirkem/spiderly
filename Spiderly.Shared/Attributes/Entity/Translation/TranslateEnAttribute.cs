@@ -22,7 +22,7 @@ namespace Spiderly.Shared.Attributes.Entity.Translation
     /// <b>Example:</b>
     /// <code>
     /// [TranslateEn("User")]
-    /// public class UserExtended : BusinessObject&lt;long&gt;
+    /// public class User : BusinessObject&lt;long&gt;
     /// {
     ///     [TranslateEn("Email address")]
     ///     public string Email { get; set; }

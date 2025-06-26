@@ -72,9 +72,9 @@ namespace Spiderly.SourceGenerators.Angular
             // ...\Backend\PlayertyLoyals.Business -> ...\Frontend\src\app\business\services\api\api.service.generated.ts
             string outputPath = callingProjectDirectory.ReplaceEverythingAfter(@"\Backend\", @"\Frontend\src\app\business\services\api\api.service.generated.ts");
 
-            List<SpiderlyClass> spiderClasses = Helpers.GetSpiderlyClasses(classes, referencedProjectClasses);
+            List<SpiderlyClass> currentProjectClasses = Helpers.GetSpiderlyClasses(classes, referencedProjectClasses);
 
-            List<SpiderlyClass> controllerClasses = spiderClasses
+            List<SpiderlyClass> controllerClasses = currentProjectClasses
                 .Where(x => x.Namespace.EndsWith($".{NamespaceExtensionCodes.Controllers}"))
                 .ToList();
 
@@ -82,8 +82,12 @@ namespace Spiderly.SourceGenerators.Angular
                 .Where(x => x.Namespace.EndsWith($".{NamespaceExtensionCodes.DTO}"))
                 .ToList();
 
-            List<SpiderlyClass> referencedEntityClasses = referencedProjectClasses
+            List<SpiderlyClass> referencedProjectEntities = referencedProjectClasses
                 .Where(x => x.Namespace.EndsWith($".{NamespaceExtensionCodes.Entities}"))
+                .ToList();
+
+            List<SpiderlyClass> currentAppEntities = referencedProjectEntities
+                .Where(x => x.Namespace != "Spiderly.Security.Entities")
                 .ToList();
 
             string result = $$"""
@@ -101,7 +105,7 @@ export class ApiGeneratedService extends ApiSecurityService {
         super(http, config);
     }
 
-{{string.Join("\n\n", GetAngularHttpMethods(controllerClasses, referencedEntityClasses, referencedDTOClasses))}}
+{{string.Join("\n\n", GetAngularHttpMethods(controllerClasses, currentAppEntities, referencedProjectEntities, referencedDTOClasses))}}
 
 }
 """;
@@ -109,18 +113,14 @@ export class ApiGeneratedService extends ApiSecurityService {
             Helpers.WriteToTheFile(result, outputPath);
         }
 
-        private static List<string> GetAngularHttpMethods(List<SpiderlyClass> controllerClasses, List<SpiderlyClass> entities, List<SpiderlyClass> referencedDTOClasses)
+        private static List<string> GetAngularHttpMethods(List<SpiderlyClass> controllerClasses, List<SpiderlyClass> currentAppEntities, List<SpiderlyClass> referencedProjectEntities, List<SpiderlyClass> referencedDTOClasses)
         {
             List<string> result = new();
             HashSet<string> alreadyAddedMethods = new HashSet<string>();
-            HashSet<string> entityNamesForGeneration = new HashSet<string>();
 
             foreach (SpiderlyClass controllerClass in controllerClasses)
             {
                 string controllerName = controllerClass.Name.Replace("Controller", "");
-
-                if (controllerClass.BaseType != "SpiderlyBaseController")
-                    entityNamesForGeneration.Add(controllerClass.BaseType.Replace("BaseController", ""));
 
                 foreach (SpiderMethod controllerMethod in controllerClass.Methods)
                 {
@@ -140,8 +140,10 @@ export class ApiGeneratedService extends ApiSecurityService {
                 }
             }
 
-            foreach (SpiderlyClass entity in entities.Where(x => entityNamesForGeneration.Contains(x.Name)))
-                result.Add(GetBaseAngularControllerMethods(entity, entities, alreadyAddedMethods));
+            foreach (SpiderlyClass entity in currentAppEntities.Where(x => x.HasUIDoNotGenerateAttribute() == false))
+            {
+                result.Add(GetBaseAngularControllerMethods(entity, referencedProjectEntities, alreadyAddedMethods));
+            }
 
             return result;
         }
@@ -154,7 +156,7 @@ export class ApiGeneratedService extends ApiSecurityService {
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { ApiSecurityService, TableFilter, TableResponse, Namebook, Codebook, LazyLoadSelectedIdsResult, VerificationTokenRequest, AuthResult, ExternalProvider } from 'spiderly';
+import { ApiSecurityService, Filter, PaginatedResult, Namebook, Codebook, LazyLoadSelectedIdsResult, VerificationTokenRequest, AuthResult, ExternalProvider } from 'spiderly';
 import { ConfigService } from '../config.service';
 """);
 
@@ -211,7 +213,7 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
             if (skipSpinner || 
                 controllerMethod.ReturnType.Contains("NamebookDTO") || 
                 controllerMethod.ReturnType.Contains("CodebookDTO") || 
-                controllerMethod.ReturnType.Contains("TableResponseDTO") ||
+                controllerMethod.ReturnType.Contains("PaginatedResultDTO") ||
                 controllerMethod.ReturnType.Contains("LazyLoadSelectedIdsResultDTO"))
             {
                 return Settings.HttpOptionsSkipSpinner;
@@ -244,7 +246,7 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
             }
         }
 
-        private static string GetBaseAngularControllerMethods(SpiderlyClass entity, List<SpiderlyClass> entities, HashSet<string> alreadyAddedMethods)
+        private static string GetBaseAngularControllerMethods(SpiderlyClass entity, List<SpiderlyClass> allEntities, HashSet<string> alreadyAddedMethods)
         {
             if (entity.IsManyToMany()) // TODO FT: Do something with M2M entities
                 return null;
@@ -252,7 +254,7 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
             return $$"""
 {{GetBaseTableDataAngularControllerMethod(entity, alreadyAddedMethods)}}
 
-{{GetBaseExportTableDataToExcelAngularControllerMethod(entity, alreadyAddedMethods)}}
+{{GetBaseExportListToExcelAngularControllerMethod(entity, alreadyAddedMethods)}}
 
 {{GetBaseGetListAngularControllerMethod(entity, alreadyAddedMethods)}}
 
@@ -264,13 +266,13 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
 
 {{GetBaseGetListForDropdownAngularControllerMethods(entity, alreadyAddedMethods)}}
 
-{{string.Join("\n\n", GetBaseOrderedOneToManyAngularControllerMethods(entity, entities, alreadyAddedMethods))}}
+{{string.Join("\n\n", GetBaseOrderedOneToManyAngularControllerMethods(entity, alreadyAddedMethods))}}
 
-{{string.Join("\n\n", GetBaseManyToManyAngularControllerMethods(entity, entities, alreadyAddedMethods))}}
+{{string.Join("\n\n", GetBaseManyToManyAngularControllerMethods(entity, allEntities, alreadyAddedMethods))}}
 
 {{GetBaseSaveAngularControllerMethod(entity, alreadyAddedMethods)}}
 
-{{string.Join("\n\n", GetBaseUploadBlobAngularControllerMethods(entity, entities, alreadyAddedMethods))}}
+{{string.Join("\n\n", GetBaseUploadBlobAngularControllerMethods(entity, alreadyAddedMethods))}}
 
 {{GetBaseDeleteAngularControllerMethods(entity, alreadyAddedMethods)}}
 
@@ -330,7 +332,7 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
 
         #region Ordered One To Many
 
-        private static List<string> GetBaseOrderedOneToManyAngularControllerMethods(SpiderlyClass entity, List<SpiderlyClass> entities, HashSet<string> alreadyAddedMethods)
+        private static List<string> GetBaseOrderedOneToManyAngularControllerMethods(SpiderlyClass entity, HashSet<string> alreadyAddedMethods)
         {
             List<string> result = new();
 
@@ -362,7 +364,7 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
 
         #region Many To Many
 
-        private static List<string> GetBaseManyToManyAngularControllerMethods(SpiderlyClass entity, List<SpiderlyClass> entities, HashSet<string> alreadyAddedMethods)
+        private static List<string> GetBaseManyToManyAngularControllerMethods(SpiderlyClass entity, List<SpiderlyClass> allEntities, HashSet<string> alreadyAddedMethods)
         {
             List<string> result = new();
 
@@ -375,7 +377,7 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
                 }
                 else if (property.HasSimpleManyToManyTableLazyLoadAttribute())
                 {
-                    result.Add(GetBaseSimpleManyToManyTableDataAngularControllerMethod(property, entity, entities, alreadyAddedMethods));
+                    result.Add(GetBaseSimpleManyToManyTableDataAngularControllerMethod(property, entity, allEntities, alreadyAddedMethods));
                     result.Add(GetBaseSimpleManyToManyTableDataExportAngularControllerMethod(property, entity, alreadyAddedMethods));
                     result.Add(GetBaseSimpleManyToManyTableLazyLoadAngularControllerMethod(property, entity, alreadyAddedMethods));
                 }
@@ -393,33 +395,33 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
             if (alreadyAddedMethods.Contains(methodName))
                 return null;
 
-            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "tableFilterDTO", "TableFilter" } };
+            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "filterDTO", "Filter" } };
 
             return GetAngularControllerMethod(methodName, postAndPutParameter, "LazyLoadSelectedIdsResult", HttpTypeCodes.Post, entity.ControllerName, Settings.HttpOptionsSkipSpinner);
         }
 
         private static string GetBaseSimpleManyToManyTableDataAngularControllerMethod(SpiderlyProperty property, SpiderlyClass entity, List<SpiderlyClass> entities, HashSet<string> alreadyAddedMethods)
         {
-            string methodName = $"Get{property.Name}TableDataFor{entity.Name}";
+            string methodName = $"GetPaginated{property.Name}ListFor{entity.Name}";
 
             if (alreadyAddedMethods.Contains(methodName))
                 return null;
 
-            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "tableFilterDTO", "TableFilter" } };
+            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "filterDTO", "Filter" } };
 
             SpiderlyClass extractedEntity = entities.Where(x => x.Name == Helpers.ExtractTypeFromGenericType(property.Type)).SingleOrDefault();
 
-            return GetAngularControllerMethod(methodName, postAndPutParameter, $"TableResponse<{extractedEntity.Name}>", HttpTypeCodes.Post, entity.ControllerName, Settings.HttpOptionsSkipSpinner);
+            return GetAngularControllerMethod(methodName, postAndPutParameter, $"PaginatedResult<{extractedEntity.Name}>", HttpTypeCodes.Post, entity.ControllerName, Settings.HttpOptionsSkipSpinner);
         }
 
         private static string GetBaseSimpleManyToManyTableDataExportAngularControllerMethod(SpiderlyProperty property, SpiderlyClass entity, HashSet<string> alreadyAddedMethods)
         {
-            string methodName = $"Export{property.Name}TableDataToExcelFor{entity.Name}";
+            string methodName = $"Export{property.Name}ListToExcelFor{entity.Name}";
 
             if (alreadyAddedMethods.Contains(methodName))
                 return null;
 
-            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "tableFilterDTO", "TableFilter" } };
+            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "filterDTO", "Filter" } };
 
             return GetAngularControllerMethod(methodName, postAndPutParameter, "any", HttpTypeCodes.Post, entity.ControllerName, Settings.HttpOptionsBlob);
         }
@@ -461,7 +463,7 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
             return GetAngularControllerMethod(methodName, getAndDeleteParameters, "any", HttpTypeCodes.Delete, entity.ControllerName, Settings.HttpOptionsBase);
         }
 
-        private static List<string> GetBaseUploadBlobAngularControllerMethods(SpiderlyClass entity, List<SpiderlyClass> entities, HashSet<string> alreadyAddedMethods)
+        private static List<string> GetBaseUploadBlobAngularControllerMethods(SpiderlyClass entity, HashSet<string> alreadyAddedMethods)
         {
             List<string> result = new();
 
@@ -585,28 +587,28 @@ import { {{ngType}} } from '../../entities/{{projectName.FromPascalToKebabCase()
             return GetAngularControllerMethod(methodName, null, $"{entity.Name}[]", HttpTypeCodes.Get, entity.ControllerName, Settings.HttpOptionsBase);
         }
 
-        private static string GetBaseExportTableDataToExcelAngularControllerMethod(SpiderlyClass entity, HashSet<string> alreadyAddedMethods)
+        private static string GetBaseExportListToExcelAngularControllerMethod(SpiderlyClass entity, HashSet<string> alreadyAddedMethods)
         {
-            string methodName = $"Export{entity.Name}TableDataToExcel";
+            string methodName = $"Export{entity.Name}ListToExcel";
 
             if (alreadyAddedMethods.Contains(methodName))
                 return null;
 
-            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "tableFilterDTO", "TableFilter" } };
+            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "filterDTO", "Filter" } };
 
             return GetAngularControllerMethod(methodName, postAndPutParameter, "any", HttpTypeCodes.Post, entity.ControllerName, Settings.HttpOptionsBlob);
         }
 
         private static string GetBaseTableDataAngularControllerMethod(SpiderlyClass entity, HashSet<string> alreadyAddedMethods)
         {
-            string methodName = $"Get{entity.Name}TableData";
+            string methodName = $"GetPaginated{entity.Name}List";
 
             if (alreadyAddedMethods.Contains(methodName))
                 return null;
 
-            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "tableFilterDTO", "TableFilter" } };
+            Dictionary<string, string> postAndPutParameter = new Dictionary<string, string> { { "filterDTO", "Filter" } };
 
-            return GetAngularControllerMethod(methodName, postAndPutParameter, $"TableResponse<{entity.Name}>", HttpTypeCodes.Post, entity.ControllerName, Settings.HttpOptionsSkipSpinner);
+            return GetAngularControllerMethod(methodName, postAndPutParameter, $"PaginatedResult<{entity.Name}>", HttpTypeCodes.Post, entity.ControllerName, Settings.HttpOptionsSkipSpinner);
         }
 
         #endregion

@@ -1,5 +1,5 @@
 import { BaseEntity } from "./base-entity";
-import { User } from "./security-entities";
+import { UserBase } from "./security-entities";
 
 export class InitTopBarData extends BaseEntity
 {
@@ -7,7 +7,7 @@ export class InitTopBarData extends BaseEntity
     userProfilePath?: string;
     unreadNotificationsCount?: number;
     showProfileIcon?: boolean;
-    currentUser?: User;
+    currentUser?: UserBase;
   
     constructor(
     {
@@ -21,7 +21,7 @@ export class InitTopBarData extends BaseEntity
         userProfilePath?: string,
         unreadNotificationsCount?: number,
         showProfileIcon?: boolean,
-        currentUser?: User,
+        currentUser?: UserBase,
     } = {}
     ) {
         super('InitTopBarData');

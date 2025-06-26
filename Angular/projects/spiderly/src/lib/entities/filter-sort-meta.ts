@@ -1,4 +1,4 @@
-export class TableFilterSortMeta
+export class FilterSortMeta
 {
     field: string;
     order: number;

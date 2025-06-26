@@ -320,7 +320,7 @@ export class {{entity.Name}}BaseDetailsComponent {
         {
             StringBuilder sb = new();
 
-            List<SpiderlyProperty> properties = GetAllFormControlProperties(entity.Properties.ToList(), entities);
+            List<SpiderlyProperty> properties = GetAllFormControlProperties(entity.Properties.ToList(), entity, customDTOClasses, entities);
 
             foreach (SpiderlyProperty property in properties)
             {
@@ -415,16 +415,16 @@ export class {{entity.Name}}BaseDetailsComponent {
             foreach (SpiderlyProperty property in entity.Properties.Where(x => x.HasSimpleManyToManyTableLazyLoadAttribute()))
             {
                 result.Add($$"""
-    selected{{property.Name}}LazyLoadMethodFor{{entity.Name}} = (event: TableFilter): Observable<LazyLoadSelectedIdsResult> => {
-        let tableFilter: TableFilter = event;
-        tableFilter.additionalFilterIdLong = this.modelId;
+    selected{{property.Name}}LazyLoadMethodFor{{entity.Name}} = (event: Filter): Observable<LazyLoadSelectedIdsResult> => {
+        let filter: Filter = event;
+        filter.additionalFilterIdLong = this.modelId;
 
-        return this.apiService.lazyLoadSelected{{property.Name}}IdsFor{{entity.Name}}(tableFilter);
+        return this.apiService.lazyLoadSelected{{property.Name}}IdsFor{{entity.Name}}(filter);
     }
     areAll{{property.Name}}SelectedChangeFor{{entity.Name}}(event: AllClickEvent){
         this.areAll{{property.Name}}SelectedFor{{entity.Name}} = event.checked;
     }
-    on{{property.Name}}LazyLoadFor{{entity.Name}}(event: TableFilter){
+    on{{property.Name}}LazyLoadFor{{entity.Name}}(event: Filter){
         this.last{{property.Name}}LazyLoadTableFilterFor{{entity.Name}} = event;
     }
 """);
@@ -570,12 +570,12 @@ export class {{entity.Name}}BaseDetailsComponent {
 
                 result.Add($$"""
     {{property.Name.FirstCharToLower()}}TableColsFor{{entity.Name}}: Column<{{extractedEntity.Name}}>[];
-    get{{property.Name}}TableDataObservableMethodFor{{entity.Name}} = this.apiService.get{{property.Name}}TableDataFor{{entity.Name}};
-    export{{property.Name}}TableDataToExcelObservableMethodFor{{entity.Name}} = this.apiService.export{{property.Name}}TableDataToExcelFor{{entity.Name}};
+    getPaginated{{property.Name}}ListObservableMethodFor{{entity.Name}} = this.apiService.getPaginated{{property.Name}}ListFor{{entity.Name}};
+    export{{property.Name}}ListToExcelObservableMethodFor{{entity.Name}} = this.apiService.export{{property.Name}}ListToExcelFor{{entity.Name}};
     newlySelected{{property.Name}}IdsFor{{entity.Name}}: number[] = [];
     unselected{{property.Name}}IdsFor{{entity.Name}}: number[] = [];
     areAll{{property.Name}}SelectedFor{{entity.Name}}: boolean = null;
-    last{{property.Name}}LazyLoadTableFilterFor{{entity.Name}}: TableFilter;
+    last{{property.Name}}LazyLoadTableFilterFor{{entity.Name}}: Filter;
 """);
             }
 
@@ -1183,9 +1183,14 @@ export class {{entity.Name}}BaseDetailsComponent {
             return orderedProperties;
         }
 
-        private static List<SpiderlyProperty> GetAllFormControlProperties(List<SpiderlyProperty> properties, List<SpiderlyClass> entities)
+        private static List<SpiderlyProperty> GetAllFormControlProperties(List<SpiderlyProperty> properties, SpiderlyClass entity, List<SpiderlyClass> customDTOClasses, List<SpiderlyClass> entities)
         {
             List<SpiderlyProperty> result = new();
+
+            SpiderlyClass customDTOClass = customDTOClasses.Where(x => x.Name.Replace("DTO", "") == entity.Name).SingleOrDefault();
+
+            if (customDTOClass != null)
+                properties.AddRange(customDTOClass.Properties);
 
             List<SpiderlyProperty> filteredProperties = properties
                 .Where(x =>
@@ -1217,7 +1222,7 @@ export class {{entity.Name}}BaseDetailsComponent {
                         )
                         .ToList();
 
-                    result.AddRange(GetAllFormControlProperties(extractedProperties, entities));
+                    result.AddRange(GetAllFormControlProperties(extractedProperties, extractedEntity, customDTOClasses, entities));
 
                     continue;
                 }
@@ -1278,8 +1283,8 @@ export class {{entity.Name}}BaseDetailsComponent {
 
                             [tableTitle]="t('{{property.Name}}')" 
                             [cols]="{{property.Name.FirstCharToLower()}}TableColsFor{{entity.Name}}" 
-                            [getTableDataObservableMethod]="get{{property.Name}}TableDataObservableMethodFor{{entity.Name}}" 
-                            [exportTableDataToExcelObservableMethod]="export{{property.Name}}TableDataToExcelObservableMethodFor{{entity.Name}}"
+                            [getPaginatedListObservableMethod]="getPaginated{{property.Name}}ListObservableMethodFor{{entity.Name}}" 
+                            [exportListToExcelObservableMethod]="export{{property.Name}}ListToExcelObservableMethodFor{{entity.Name}}"
                             [showAddButton]="false" 
                             [readonly]="!isAuthorizedForSave"
                             selectionMode="multiple"
@@ -1364,7 +1369,7 @@ export class {{entity.Name}}BaseDetailsComponent {
                     break;
             }
 
-            return UIControlTypeCodes.TODO;
+            return UIControlTypeCodes.None; // Note: We can't throw exception here
         }
 
         private static string GetUIStringControlType(UIControlTypeCodes controlType)
@@ -1402,10 +1407,8 @@ export class {{entity.Name}}BaseDetailsComponent {
                     return "spiderly-textbox";
                 case UIControlTypeCodes.Table:
                     return "spiderly-data-table";
-                case UIControlTypeCodes.TODO:
-                    return "TODO";
                 default:
-                    return "TODO";
+                    return $"Unknown UIControlType: '{controlType}'.";
 
             }
         }
@@ -1463,7 +1466,7 @@ import { ActivatedRoute } from '@angular/router';
 import { combineLatest, firstValueFrom, forkJoin, map, Observable, of, Subscription } from 'rxjs';
 import { MenuItem } from 'primeng/api';
 import { AuthService } from '../../services/auth/auth.service';
-import { SpiderlyControlsModule, CardSkeletonComponent, IndexCardComponent, IsAuthorizedForSaveEvent, SpiderlyDataTableComponent, SpiderlyFormArray, BaseEntity, LastMenuIconIndexClicked, SpiderlyFormGroup, SpiderlyButton, nameof, BaseFormService, getControl, Column, TableFilter, LazyLoadSelectedIdsResult, AllClickEvent, SpiderlyFileSelectEvent, getPrimengDropdownNamebookOptions, PrimengOption, SpiderlyFormControl, getPrimengAutocompleteNamebookOptions } from 'spiderly';
+import { SpiderlyControlsModule, CardSkeletonComponent, IndexCardComponent, IsAuthorizedForSaveEvent, SpiderlyDataTableComponent, SpiderlyFormArray, BaseEntity, LastMenuIconIndexClicked, SpiderlyFormGroup, SpiderlyButton, nameof, BaseFormService, getControl, Column, Filter, LazyLoadSelectedIdsResult, AllClickEvent, SpiderlyFileSelectEvent, getPrimengDropdownNamebookOptions, PrimengOption, SpiderlyFormControl, getPrimengAutocompleteNamebookOptions } from 'spiderly';
 {{string.Join("\n", GetDynamicNgImports(imports))}}
 """;
         }

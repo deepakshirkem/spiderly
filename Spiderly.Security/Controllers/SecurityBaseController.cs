@@ -103,9 +103,9 @@ namespace Spiderly.Security.SecurityControllers // Needs to be other namespace b
         [HttpGet]
         [AuthGuard]
         [SkipSpinner]
-        public async Task<UserDTO> GetCurrentUser()
+        public async Task<UserBaseDTO> GetCurrentUserBase()
         {
-            return await _securityBusinessService.GetCurrentUserDTO();
+            return await _securityBusinessService.GetCurrentUserBaseDTO();
         }
 
         [HttpGet]
@@ -122,16 +122,16 @@ namespace Spiderly.Security.SecurityControllers // Needs to be other namespace b
 
         [HttpPost]
         [AuthGuard]
-        public async Task<TableResponseDTO<RoleDTO>> GetRoleTableData(TableFilterDTO tableFilterDTO)
+        public async Task<PaginatedResultDTO<RoleDTO>> GetPaginatedRoleList(FilterDTO filterDTO)
         {
-            return await _securityBusinessService.GetRoleTableData(tableFilterDTO, _context.DbSet<Role>(), true);
+            return await _securityBusinessService.GetPaginatedRoleList(filterDTO, _context.DbSet<Role>(), true);
         }
 
         [HttpPost]
         [AuthGuard]
-        public async Task<IActionResult> ExportRoleTableDataToExcel(TableFilterDTO tableFilterDTO)
+        public async Task<IActionResult> ExportRoleListToExcel(FilterDTO filterDTO)
         {
-            byte[] fileContent = await _securityBusinessService.ExportRoleTableDataToExcel(tableFilterDTO, _context.DbSet<Role>(), true);
+            byte[] fileContent = await _securityBusinessService.ExportRoleListToExcel(filterDTO, _context.DbSet<Role>(), true);
             return File(fileContent, SettingsProvider.Current.ExcelContentType, Uri.EscapeDataString($"Roles.xlsx"));
         }
 

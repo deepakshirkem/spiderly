@@ -11,14 +11,14 @@ using System.Text;
 namespace Spiderly.SourceGenerators.Net
 {
     /// <summary>
-    /// Generates the `TableFilterQueryable` static class (`TableFilterQueryable.generated.cs`)
-    /// within the `{YourBaseNamespace}.TableFiltering` namespace. This class provides a method
+    /// Generates the `PaginatedResultGenerator` static class (`PaginatedResultGenerator.generated.cs`)
+    /// within the `{YourBaseNamespace}.Filtering` namespace. This class provides a method
     /// `Build` that dynamically constructs an EF Core query with filtering based on the
-    /// `TableFilterDTO` payload. It intelligently handles filtering on properties that might
+    /// `FilterDTO` payload. It intelligently handles filtering on properties that might
     /// exist in the DTO but not directly in the entity, by looking up mapping configurations.
     /// </summary>
     [Generator]
-    public class TableFilterQueryGenerator : IIncrementalGenerator
+    public class PaginatedResultGenerator : IIncrementalGenerator
     {
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -54,10 +54,10 @@ namespace Spiderly.SourceGenerators.Net
             if (classes.Count <= 1) 
                 return;
 
-            List<SpiderlyClass> spiderClasses = Helpers.GetSpiderlyClasses(classes, referencedProjectClasses);
-            List<SpiderlyClass> allClasses = spiderClasses.Concat(referencedProjectClasses).ToList();
-            List<SpiderlyClass> currentProjectDTOClasses = Helpers.GetDTOClasses(spiderClasses, allClasses);
-            List<SpiderlyClass> currentProjectEntities = spiderClasses.Where(x => x.Namespace.EndsWith(".Entities")).ToList();
+            List<SpiderlyClass> spiderlyClasses = Helpers.GetSpiderlyClasses(classes, referencedProjectClasses);
+            List<SpiderlyClass> allClasses = spiderlyClasses.Concat(referencedProjectClasses).ToList();
+            List<SpiderlyClass> currentProjectDTOClasses = Helpers.GetDTOClasses(spiderlyClasses, allClasses);
+            List<SpiderlyClass> currentProjectEntities = spiderlyClasses.Where(x => x.Namespace.EndsWith(".Entities")).ToList();
             List<SpiderlyClass> allEntityClasses = allClasses.Where(x => x.Namespace.EndsWith(".Entities")).ToList();
 
             StringBuilder sb = new();
@@ -73,13 +73,14 @@ using LinqKit;
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 using Spiderly.Shared.DTO;
+using Spiderly.Shared.Classes;
 using Spiderly.Shared.Enums;
 using System.Text.Json;
 using {{basePartOfNamespace}}.Entities;
 
-namespace {{basePartOfNamespace}}.TableFiltering
+namespace {{basePartOfNamespace}}.Filtering
 {
-    public static class TableFilterQueryable
+    public static class PaginatedResultGenerator
     {
 """);
             foreach (SpiderlyClass entity in currentProjectEntities)
@@ -90,19 +91,19 @@ namespace {{basePartOfNamespace}}.TableFiltering
                     continue;
 
                 sb.AppendLine($$"""
-        public static async Task<PaginationResult<{{entity.Name}}>> Build(IQueryable<{{entity.Name}}> query, TableFilterDTO tableFilterPayload)
+        public static async Task<PaginatedResult<{{entity.Name}}>> Build(IQueryable<{{entity.Name}}> query, FilterDTO filterDTO)
         {
             Expression<Func<{{entity.Name}}, bool>> predicate = PredicateBuilder.New<{{entity.Name}}>(true);
 
-            foreach (KeyValuePair<string, List<TableFilterContext>> item in tableFilterPayload.Filters)
+            foreach (KeyValuePair<string, List<FilterRuleDTO>> filter in filterDTO.Filters)
             {
-                foreach (TableFilterContext filter in item.Value)
+                foreach (FilterRuleDTO filterRuleDTO in filter.Value)
                 {
-                    if (filter.Value != null)
+                    if (filterRuleDTO.Value != null)
                     {
                         Expression<Func<{{entity.Name}}, bool>> condition;
 
-                        switch (item.Key)
+                        switch (filter.Key)
                         {
 """);
                 // I go through all the DTO properties, and if I come across one that doesn't exist in the EF class, I look for a solution in the mappers; if it doesn't exist there either, I log an appropriate error.
@@ -183,7 +184,7 @@ namespace {{basePartOfNamespace}}.TableFiltering
 
             query = query.Where(predicate);
 
-            return new PaginationResult<{{entity.Name}}>()
+            return new PaginatedResult<{{entity.Name}}>()
             {
                 TotalRecords = await query.CountAsync(),
                 Query = query
@@ -204,7 +205,7 @@ using {{item}};
             }
 
             sbUsings.AppendLine(sb.ToString());
-            context.AddSource("TableFilterQueryable.generated", SourceText.From(sbUsings.ToString(), Encoding.UTF8));
+            context.AddSource("PaginatedResultGenerator.generated", SourceText.From(sbUsings.ToString(), Encoding.UTF8));
         }
 
 
@@ -213,16 +214,16 @@ using {{item}};
         {
             return $$"""
                             case "{{DTOIdentifier.FirstCharToLower()}}":
-                                switch (filter.MatchMode)
+                                switch (filterRuleDTO.MatchMode)
                                 {
                                     case MatchModeCodes.StartsWith:
-                                        condition = x => x.{{entityDotNotation}}.StartsWith(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}}.StartsWith(filterRuleDTO.Value.ToString());
                                         break;
                                     case MatchModeCodes.Contains:
-                                        condition = x => x.{{entityDotNotation}}.Contains(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}}.Contains(filterRuleDTO.Value.ToString());
                                         break;
                                     case MatchModeCodes.Equals:
-                                        condition = x => x.{{entityDotNotation}}.Equals(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}}.Equals(filterRuleDTO.Value.ToString());
                                         break;
                                     default:
                                         throw new ArgumentException("Invalid string match mode!");
@@ -236,10 +237,10 @@ using {{item}};
         {
             return $$"""
                             case "{{DTOIdentifier.FirstCharToLower()}}":
-                                switch (filter.MatchMode)
+                                switch (filterRuleDTO.MatchMode)
                                 {
                                     case MatchModeCodes.Equals:
-                                        condition = x => x.{{entityDotNotation}}.Equals(Convert.ToBoolean(filter.Value.ToString()));
+                                        condition = x => x.{{entityDotNotation}}.Equals(Convert.ToBoolean(filterRuleDTO.Value.ToString()));
                                         break;
                                     default:
                                         throw new ArgumentException("Invalid bool match mode!");
@@ -253,16 +254,16 @@ using {{item}};
         {
             return $$"""
                             case "{{DTOIdentifier.FirstCharToLower()}}":
-                                switch (filter.MatchMode)
+                                switch (filterRuleDTO.MatchMode)
                                 {
                                     case MatchModeCodes.Equals:
-                                        condition = x => x.{{entityDotNotation}} == Convert.ToDateTime(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}} == Convert.ToDateTime(filterRuleDTO.Value.ToString());
                                         break;
                                     case MatchModeCodes.LessThan:
-                                        condition = x => x.{{entityDotNotation}} < Convert.ToDateTime(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}} < Convert.ToDateTime(filterRuleDTO.Value.ToString());
                                         break;
                                     case MatchModeCodes.GreaterThan:
-                                        condition = x => x.{{entityDotNotation}} > Convert.ToDateTime(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}} > Convert.ToDateTime(filterRuleDTO.Value.ToString());
                                         break;
                                     default:
                                         throw new ArgumentException("Invalid DateTime match mode!");
@@ -278,19 +279,19 @@ using {{item}};
 
             return $$"""
                             case "{{DTOIdentifier.FirstCharToLower()}}":
-                                switch (filter.MatchMode)
+                                switch (filterRuleDTO.MatchMode)
                                 {
                                     case MatchModeCodes.Equals:
-                                        condition = x => x.{{entityDotNotation}} == {{numberTypeWithoutQuestion}}.Parse(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}} == {{numberTypeWithoutQuestion}}.Parse(filterRuleDTO.Value.ToString());
                                         break;
                                     case MatchModeCodes.LessThan:
-                                        condition = x => x.{{entityDotNotation}} < {{numberTypeWithoutQuestion}}.Parse(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}} < {{numberTypeWithoutQuestion}}.Parse(filterRuleDTO.Value.ToString());
                                         break;
                                     case MatchModeCodes.GreaterThan:
-                                        condition = x => x.{{entityDotNotation}} > {{numberTypeWithoutQuestion}}.Parse(filter.Value.ToString());
+                                        condition = x => x.{{entityDotNotation}} > {{numberTypeWithoutQuestion}}.Parse(filterRuleDTO.Value.ToString());
                                         break;
                                     case MatchModeCodes.In:
-                                        {{numberType}}[] values = JsonSerializer.Deserialize<{{numberType}}[]>(filter.Value.ToString());
+                                        {{numberType}}[] values = JsonSerializer.Deserialize<{{numberType}}[]>(filterRuleDTO.Value.ToString());
                                         condition = x => values.Contains(x.{{entityDotNotation}});
                                         break;
                                     default:
@@ -305,10 +306,10 @@ using {{item}};
         {
             return $$"""
                             case "{{DTOIdentifier.FirstCharToLower()}}":
-                                switch (filter.MatchMode)
+                                switch (filterRuleDTO.MatchMode)
                                 {
                                     case MatchModeCodes.In:
-                                        {{idType}}[] values = JsonSerializer.Deserialize<{{idType}}[]>(filter.Value.ToString());
+                                        {{idType}}[] values = JsonSerializer.Deserialize<{{idType}}[]>(filterRuleDTO.Value.ToString());
                                         condition = x => x.{{entityDotNotation}}.Any(x => values.Contains(x.Id));
                                         break;
                                     default:
@@ -352,38 +353,6 @@ using {{item}};
             }
 
             return null;
-
-            // TODO FT: Delete, complicating for custom class mapper
-            //SpiderClass nonGeneratedMapperClass = allClasses.Where(x => x.Namespace.EndsWith(".DataMappers")).SingleOrDefault(); // FT: Can be null if the user still didn't made DataMappers partial class
-
-            //List<SpiderMethod> methodsOfTheNonGeneratedMapperClass = nonGeneratedMapperClass?.Methods; // FT: Classes from referenced assemblies won't have method body, but here it's not important.
-
-            //return GetEntityDotNotationForDTO(methodsOfTheNonGeneratedMapperClass, DTOClass.Name, entity.Name, DTOClassProp);
-        }
-
-        /// <summary>
-        /// </summary>
-        /// <param name="mapMethod">public static partial UserDTO Map(User poco);</param>
-        /// <param name="DTOClassProp">RoleDisplayName</param>
-        /// <returns></returns>
-        public static string GetFirstAttributeParamFromMapper(MethodDeclarationSyntax mapMethod, string DTOClassProp)
-        {
-            foreach (var attributeList in mapMethod.AttributeLists)
-            {
-                foreach (var attribute in attributeList.Attributes)
-                {
-                    SeparatedSyntaxList<AttributeArgumentSyntax> arguments = attribute.ArgumentList.Arguments; // "Role.Id", "RoleDisplayName"
-                    if (arguments.Count > 1) // Doing this because of MapperIgnoreTarget
-                    {
-                        if (arguments[1].ToString().Split('.').First().Trim('"') == DTOClassProp)
-                        {
-                            return arguments[0].ToString().Trim('"');
-                        }
-                    }
-                }
-            }
-
-            return null;
         }
 
         public static string GetPropTypeOfEntityDotNotationProperty(string entityDotNotation, SpiderlyClass entityClass, List<SpiderlyClass> allClasses)
@@ -407,40 +376,5 @@ using {{item}};
 
             return prop.Type;
         }
-
-        public static string GetEntityDotNotationForDTO(List<SpiderMethod> methodsOfTheNonGeneratedMapperClass, string destinationDTOClass, string sourceEntityClass, string DTOProp)
-        {
-            if (methodsOfTheNonGeneratedMapperClass == null)
-                return null;
-
-            List<SpiderMethod> methodsWithTableFiltersAttribute = methodsOfTheNonGeneratedMapperClass.Where(x => x.Attributes.Any(x => x.Name == "TableFiltersListener")).ToList();
-
-            SpiderMethod currentConfigMethod = methodsWithTableFiltersAttribute.Where(x => x.Body.Contains($".NewConfig<{sourceEntityClass}, {destinationDTOClass}>()")).SingleOrDefault();
-
-            if (currentConfigMethod == null)
-                return null;
-
-            IEnumerable<InvocationExpressionSyntax> newConfigCalls = currentConfigMethod.DescendantNodes
-                .OfType<InvocationExpressionSyntax>()
-                .Where(invocation => invocation.Expression.ToString().Contains("NewConfig"));
-
-            foreach (InvocationExpressionSyntax invocation in newConfigCalls)
-            {
-                List<string> linqRows = invocation.ArgumentList?.Arguments.Select(x => x.ToString()).ToList();
-
-                if (linqRows.Where(x => x.Split('.').LastOrDefault() == DTOProp).Count() == 1) // dest.TestDisplayName -> TestDisplayName
-                {
-                    string src = linqRows.Where(x => x.Split('.').LastOrDefault() != DTOProp).Single(); // src => src.Gender.Name
-                    List<string> parts = src.Split('.').ToList(); // src => src ; Gender ; Name
-                    List<string> partsToJoin = parts.GetRange(1, parts.Count - 1).ToList(); // Gender ; Name
-                    return string.Join(".", partsToJoin);
-                }
-            }
-
-            return null;
-        }
-
-
-
     }
 }

@@ -79,7 +79,7 @@ namespace Spiderly.SourceGenerators.Angular
             StringBuilder sb = new();
             StringBuilder sbImports = new();
             sbImports.Append($$"""
-import { BaseEntity, TableFilter, TableFilterContext, TableFilterSortMeta, MimeTypes, Namebook } from 'spiderly';
+import { BaseEntity, Filter, FilterRule, FilterSortMeta, MimeTypes, Namebook } from 'spiderly';
 {{string.Join("\n", GetEnumPropertyImports(currentProjectDTOClasses, projectName))}}
 
 """);

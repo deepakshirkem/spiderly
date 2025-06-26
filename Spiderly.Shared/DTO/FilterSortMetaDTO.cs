@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace Spiderly.Shared.DTO
 {
-    public class PaginationResult<T> where T : class
+    public class FilterSortMetaDTO
     {
-        public int TotalRecords { get; set; }
-        public IQueryable<T> Query { get; set; }
+        public string Field { get; set; }
+        public int Order { get; set; }
     }
 }
