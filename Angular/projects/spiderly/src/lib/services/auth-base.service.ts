@@ -197,10 +197,10 @@ export class AuthBaseService implements OnDestroy {
     return browserId;
   }
 
-  isAccessTokenExpired(): Observable<boolean> {
+  isAccessTokenExpired(): boolean {
     const expired = this.getTokenRemainingTime() < 5000;
     
-    return of(expired);
+    return expired;
   }
 
   getTokenRemainingTime(): number {

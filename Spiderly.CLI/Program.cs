@@ -57,15 +57,6 @@ namespace Spiderly.CLI
             }
 
             Console.WriteLine("\nUnrecognized command. Type 'spiderly help' to see a list of available commands.");
-
-            //IConfiguration config = new ConfigurationBuilder()
-            //    .AddCommandLine(args)
-            //    .Build();
-
-            //string initType = config["init"];
-            //string primaryColor = config["primary-color"];
-            //string appName = config["app-name"];
-            //string currentPath = Environment.CurrentDirectory;
         }
 
 
@@ -267,28 +258,6 @@ namespace Spiderly.CLI
 
             Console.WriteLine("\nGenerating files for the entity...");
 
-            string backendControllersPath = Path.Combine(rootPath, "Backend", $"{appName}.WebAPI", "Controllers");
-            if (!Directory.Exists(backendControllersPath))
-            {
-                Console.WriteLine($"\n[WARNING] Controllers folder not found: {backendControllersPath}");
-            }
-            else
-            {
-                string controllerFileName = $"{entityName}Controller.cs";
-                string controllerFilePath = Path.Combine(backendControllersPath, controllerFileName);
-
-                if (File.Exists(controllerFilePath))
-                {
-                    Console.WriteLine($"\n[WARNING] Controller file already exists: {controllerFileName}");
-                }
-                else
-                {
-                    string controllerTemplate = NetAndAngularFilesGenerator.GetSpiderlyControllerTemplate(entityName, appName);
-                    await File.WriteAllTextAsync(controllerFilePath, controllerTemplate, Encoding.UTF8);
-                    Console.WriteLine($"\nController successfully generated: {controllerFilePath}");
-                }
-            }
-
             string pagesFolderPath = Path.Combine(rootPath, "Frontend", "src", "app", "pages");
             if (!Directory.Exists(pagesFolderPath))
             {
@@ -324,20 +293,20 @@ namespace Spiderly.CLI
                     }
 
                     await File.WriteAllTextAsync(listTsPath, listTsTemplate, Encoding.UTF8);
-                    Console.WriteLine($"List .ts file successfully generated: {listTsPath}");
+                    Console.WriteLine($"\nList .ts file successfully generated: {listTsPath}");
 
                     await File.WriteAllTextAsync(listHtmlPath, listHtmlTemplate, Encoding.UTF8);
-                    Console.WriteLine($"List .html file successfully generated: {listHtmlPath}");
+                    Console.WriteLine($"\nList .html file successfully generated: {listHtmlPath}");
 
                     string detailsTsPath = Path.Combine(newPageFolderPath, $"{kebabEntityName}-details.component.ts");
                     string detailsTsTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularDetailsTsTemplate(entityName);
                     await File.WriteAllTextAsync(detailsTsPath, detailsTsTemplate, Encoding.UTF8);
-                    Console.WriteLine($"Details ts successfully generated: {detailsTsPath}");
+                    Console.WriteLine($"\nDetails .ts successfully generated: {detailsTsPath}");
 
                     string detailsHtmlPath = Path.Combine(newPageFolderPath, $"{kebabEntityName}-details.component.html");
                     string detailsHtmlTemplate = NetAndAngularFilesGenerator.GetSpiderlyAngularDetailsHtmlTemplate(entityName);
                     await File.WriteAllTextAsync(detailsHtmlPath, detailsHtmlTemplate, Encoding.UTF8);
-                    Console.WriteLine($"Details html successfully generated: {detailsHtmlPath}");
+                    Console.WriteLine($"\nDetails .html successfully generated: {detailsHtmlPath}");
                 }
             }
 

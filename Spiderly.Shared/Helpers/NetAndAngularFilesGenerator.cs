@@ -10,7 +10,10 @@ namespace Spiderly.Shared.Helpers
 {
     public static class NetAndAngularFilesGenerator
     {
-        public static void Generate(string outputPath, string appName, string version, bool isFromNuget, string primaryColor, bool hasTopMenu)
+        /// <summary>
+        /// Generates the starter project template for a Spiderly application, including both backend and frontend components.
+        /// </summary>
+        public static void Generate(string outputPath, string appName, string spiderlyVersion, bool isFromNuget, string primaryColor, bool hasTopMenu)
         {
             string jwtKey = GenerateJwtSecretKey();
 
@@ -59,14 +62,6 @@ namespace Spiderly.Shared.Helpers
                                                     new SpiderlyFolder
                                                     {
                                                         Name = "enums",
-                                                    },
-                                                    new SpiderlyFolder
-                                                    {
-                                                        Name = "guards",
-                                                    },
-                                                    new SpiderlyFolder
-                                                    {
-                                                        Name = "interceptors",
                                                     },
                                                     new SpiderlyFolder
                                                     {
@@ -283,7 +278,7 @@ namespace Spiderly.Shared.Helpers
                         {
                             new SpiderlyFile { Name = ".editorconfig", Data = GetEditOrConfigData() },
                             new SpiderlyFile { Name = "angular.json", Data = GetAngularJsonData(appName) },
-                            new SpiderlyFile { Name = "package.json", Data = GetPackageJsonData(appName, version) },
+                            new SpiderlyFile { Name = "package.json", Data = GetPackageJsonData(appName, spiderlyVersion) },
                             new SpiderlyFile { Name = "README.md", Data = "" },
                             new SpiderlyFile { Name = "tsconfig.app.json", Data = GetTsConfigAppJsonData() },
                             new SpiderlyFile { Name = "tsconfig.json", Data = GetTsConfigJsonData(isFromNuget) },
@@ -345,15 +340,10 @@ namespace Spiderly.Shared.Helpers
                                             new SpiderlyFile { Name = $"{appName}BusinessService.cs", Data = GetBusinessServiceCsData(appName) },
                                         }
                                     },
-                                    new SpiderlyFolder
-                                    {
-                                        Name = "ValidationRules",
-                                    },
                                 },
                                 Files =
                                 {
-                                    new SpiderlyFile { Name = "GeneratorSettings.cs", Data = GetBusinessGeneratorSettingsData(appName) },
-                                    new SpiderlyFile { Name = $"{appName}.Business.csproj", Data = GetBusinessCsProjData(appName, version, isFromNuget) },
+                                    new SpiderlyFile { Name = $"{appName}.Business.csproj", Data = GetBusinessCsProjData(appName, spiderlyVersion, isFromNuget) },
                                     new SpiderlyFile { Name = $"Settings.cs", Data = GetBusinessSettingsCsData(appName) },
                                 }
                             },
@@ -363,7 +353,7 @@ namespace Spiderly.Shared.Helpers
                                 Files =
                                 {
                                     new SpiderlyFile { Name = $"{appName}ApplicationDbContext.cs", Data = GetInfrastructureApplicationDbContextData(appName) },
-                                    new SpiderlyFile { Name = $"{appName}.Infrastructure.csproj", Data = GetInfrastructureCsProjData(appName, version, isFromNuget) },
+                                    new SpiderlyFile { Name = $"{appName}.Infrastructure.csproj", Data = GetInfrastructureCsProjData(appName, spiderlyVersion, isFromNuget) },
                                 }
                             },
                             new SpiderlyFolder
@@ -395,7 +385,7 @@ namespace Spiderly.Shared.Helpers
                                 },
                                 Files =
                                 {
-                                    new SpiderlyFile { Name = $"{appName}.Shared.csproj", Data = GetSharedCsProjData(version, isFromNuget) },
+                                    new SpiderlyFile { Name = $"{appName}.Shared.csproj", Data = GetSharedCsProjData(spiderlyVersion, isFromNuget) },
                                 }
                             },
                             new SpiderlyFolder
@@ -429,10 +419,6 @@ namespace Spiderly.Shared.Helpers
                                             new SpiderlyFile { Name = "CompositionRoot.cs", Data = GetCompositionRootCsData(appName) },
                                         }
                                     },
-                                    new SpiderlyFolder
-                                    {
-                                        Name = "Helpers",
-                                    },
                                 },
                                 Files =
                                 {
@@ -445,8 +431,7 @@ namespace Spiderly.Shared.Helpers
                                         blobStorageUrl: null,
                                         sqlServerConnectionString: sqlServerConnectionString
                                     )},
-                                    new SpiderlyFile { Name = "GeneratorSettings.cs", Data = GetWebAPIGeneratorSettingsData(appName) },
-                                    new SpiderlyFile { Name = $"{appName}.WebAPI.csproj", Data = GetWebAPICsProjData(appName, version, isFromNuget) },
+                                    new SpiderlyFile { Name = $"{appName}.WebAPI.csproj", Data = GetWebAPICsProjData(appName, spiderlyVersion, isFromNuget) },
                                     new SpiderlyFile { Name = $"{appName}.WebAPI.csproj.user", Data = GetWebAPICsProjUserData() },
                                     new SpiderlyFile { Name = "Program.cs", Data = GetProgramCsData(appName) },
                                     new SpiderlyFile { Name = "Settings.cs", Data = GetWebAPISettingsCsData(appName) },
@@ -630,7 +615,7 @@ import { Column, SpiderlyDataTableComponent } from 'spiderly';
     templateUrl: './{{kebabEntityName}}-list.component.html',
     imports: [
         TranslocoDirective,
-        SpiderlyDataTableComponent
+        SpiderlyDataTableComponent,
     ]
 })
 export class {{entityName}}ListComponent implements OnInit {
@@ -684,22 +669,23 @@ import { ApiService } from 'src/app/business/services/api/api.service';
 import { TranslocoDirective, TranslocoService } from '@jsverse/transloco';
 import { Component, OnInit } from '@angular/core';
 import { {{entityName}} } from 'src/app/business/entities/business-entities.generated';
-import { Column, SpiderlyDataDataViewComponent } from 'spiderly';
+import { DataViewCardBody, SpiderlyControlsModule, SpiderlyDataViewComponent, SpiderlyTemplateTypeDirective, DataViewFilter } from 'spiderly';
 
 @Component({
     selector: '{{kebabEntityName}}-list',
     templateUrl: './{{kebabEntityName}}-list.component.html',
     imports: [
         TranslocoDirective,
-        SpiderlyDataDataViewComponent
+        SpiderlyTemplateTypeDirective,
+        SpiderlyDataViewComponent,
+        SpiderlyControlsModule,
     ]
 })
-export class {{entityName}}DataViewComponent implements OnInit {
-    cols: Column<{{entityName}}>[];
+export class {{entityName}}ListComponent implements OnInit {
+    templateType: DataViewCardBody<{{entityName}}>;
+    filters: DataViewFilter<{{entityName}}>[];
 
     getPaginated{{entityName}}ListObservableMethod = this.apiService.getPaginated{{entityName}}List;
-    export{{entityName}}ListToExcelObservableMethod = this.apiService.export{{entityName}}ListToExcel;
-    delete{{entityName}}ObservableMethod = this.apiService.delete{{entityName}};
 
     constructor(
         private apiService: ApiService,
@@ -707,12 +693,8 @@ export class {{entityName}}DataViewComponent implements OnInit {
     ) { }
 
     ngOnInit(){
-        this.cols = [
-            {name: this.translocoService.translate('Id'), filterType: 'numeric', field: 'id'},
-            {actions:[
-                {name: this.translocoService.translate('Details'), field: 'Details'},
-                {name:  this.translocoService.translate('Delete'), field: 'Delete'},
-            ]},
+        this.filters = [
+            {label: this.translocoService.translate('Id'), type: 'numeric', field: 'id', showMatchModes: true},
         ]
     }
 }
@@ -721,16 +703,19 @@ export class {{entityName}}DataViewComponent implements OnInit {
 
         public static string GetSpiderlyAngularDataViewHtmlTemplate(string entityName)
         {
-            return $$"""
+            return $$$"""
 <ng-container *transloco="let t">
 
-    <spiderly-data-table [tableTitle]="t('{{entityName}}List')" 
-    [cols]="cols" 
-    [getPaginatedListObservableMethod]="getPaginated{{entityName}}ListObservableMethod" 
-    [exportListToExcelObservableMethod]="export{{entityName}}ListToExcelObservableMethod"
-    [deleteItemFromDataViewObservableMethod]="delete{{entityName}}ObservableMethod"
-    [showAddButton]="true"
-    ></spiderly-data-table>
+    <spiderly-data-view 
+    [getPaginatedListObservableMethod]="getPaginated{{{entityName}}}ListObservableMethod" 
+    [filters]="filters"
+    >
+        <ng-template #cardBody [templateType]="templateType" let-item let-index="index">
+            <div class="card">
+                {{item.id}}
+            </div>
+        </ng-template>
+    </spiderly-data-view>
 
 </ng-container>
 """;
@@ -1630,52 +1615,54 @@ import { InMemoryScrollingOptions, RouterConfigOptions, Routes } from '@angular/
 import { AuthGuard, NotAuthGuard } from 'spiderly';
 import { LayoutComponent } from './business/layout/layout.component';
 
+const layoutRoutes: Routes = [
+    {
+        path: '',
+        loadComponent: () => import('./pages/homepage/homepage.component').then(c => c.HomepageComponent),
+        canActivate: [AuthGuard]
+    },
+    {
+        path: 'administration/users',
+        loadComponent: () => import('./pages/administration/user/user-list.component').then(c => c.UserListComponent),
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'administration/users/:id',
+        loadComponent: () => import('./pages/administration/user/user-details.component').then(c => c.UserDetailsComponent),
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'administration/roles',
+        loadComponent: () => import('./pages/administration/role/role-list.component').then(c => c.RoleListComponent),
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'administration/roles/:id',
+        loadComponent: () => import('./pages/administration/role/role-details.component').then(c => c.RoleDetailsComponent),
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'administration/notifications',
+        loadComponent: () => import('./pages/administration/notification/notification-list.component').then(c => c.NotificationListComponent),
+        canActivate: [AuthGuard],
+    },
+    {
+        path: 'administration/notifications/:id',
+        loadComponent: () => import('./pages/administration/notification/notification-details.component').then(c => c.NotificationDetailsComponent),
+        canActivate: [AuthGuard],
+    },
+    { 
+        path: 'notifications',
+        loadComponent: () => import('./pages/notifications-view/notifications-view.component').then(c => c.NotificationsViewComponent),
+        canActivate: [AuthGuard]
+    },
+];
+
 export const routes: Routes = [
     {
         path: '', 
         component: LayoutComponent,
-        children: [
-            {
-                path: '',
-                loadComponent: () => import('./pages/homepage/homepage.component').then(c => c.HomepageComponent),
-                canActivate: [AuthGuard]
-            },
-            {
-                path: 'administration/users',
-                loadComponent: () => import('./pages/administration/user/user-list.component').then(c => c.UserListComponent),
-                canActivate: [AuthGuard],
-            },
-            {
-                path: 'administration/users/:id',
-                loadComponent: () => import('./pages/administration/user/user-details.component').then(c => c.UserDetailsComponent),
-                canActivate: [AuthGuard],
-            },
-            {
-                path: 'administration/roles',
-                loadComponent: () => import('./pages/administration/role/role-list.component').then(c => c.RoleListComponent),
-                canActivate: [AuthGuard],
-            },
-            {
-                path: 'administration/roles/:id',
-                loadComponent: () => import('./pages/administration/role/role-details.component').then(c => c.RoleDetailsComponent),
-                canActivate: [AuthGuard],
-            },
-            {
-                path: 'administration/notifications',
-                loadComponent: () => import('./pages/administration/notification/notification-list.component').then(c => c.NotificationListComponent),
-                canActivate: [AuthGuard],
-            },
-            {
-                path: 'administration/notifications/:id',
-                loadComponent: () => import('./pages/administration/notification/notification-details.component').then(c => c.NotificationDetailsComponent),
-                canActivate: [AuthGuard],
-            },
-            { 
-                path: 'notifications',
-                loadComponent: () => import('./pages/notifications-view/notifications-view.component').then(c => c.NotificationsViewComponent),
-                canActivate: [AuthGuard]
-            },
-        ],
+        children: layoutRoutes,
     },
     {
         path: 'login',
@@ -2472,7 +2459,6 @@ namespace {{appName}}.Business.Enums
 
     }
 }
-
 """;
         }
 
@@ -3009,7 +2995,7 @@ namespace {{appName}}.WebAPI
 """;
         }
 
-        private static string GetWebAPICsProjData(string appName, string version, bool isFromNuget)
+        private static string GetWebAPICsProjData(string appName, string spiderlyVersion, bool isFromNuget)
         {
             return $$"""
 <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -3063,15 +3049,11 @@ namespace {{appName}}.WebAPI
 		<PackageReference Include="System.Diagnostics.Tracing" Version="4.3.0" />
 		<PackageReference Include="System.Net.Primitives" Version="4.3.0" />
 {{XmlCommented($$"""
-        <PackageReference Include="Spiderly.Infrastructure" Version="{{version}}" />
-        <PackageReference Include="Spiderly.Security" Version="{{version}}" />
-        <PackageReference Include="Spiderly.Shared" Version="{{version}}" />
-        <PackageReference Include="Spiderly.SourceGenerators" Version="{{version}}" />
+        <PackageReference Include="Spiderly.Infrastructure" Version="{{spiderlyVersion}}" />
+        <PackageReference Include="Spiderly.Security" Version="{{spiderlyVersion}}" />
+        <PackageReference Include="Spiderly.Shared" Version="{{spiderlyVersion}}" />
+        <PackageReference Include="Spiderly.SourceGenerators" Version="{{spiderlyVersion}}" />
 """, !isFromNuget)}}
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Folder Include="Helpers\" />
 	</ItemGroup>
 
 </Project>
@@ -3090,21 +3072,6 @@ namespace {{appName}}.WebAPI
     <DebuggerFlavor>ProjectDebugger</DebuggerFlavor>
   </PropertyGroup>
 </Project>
-""";
-        }
-
-        private static string GetWebAPIGeneratorSettingsData(string appName)
-        {
-            return $$"""
-using Spiderly.Shared.Attributes;
-
-namespace {{appName}}.WebAPI.GeneratorSettings
-{
-    public class GeneratorSettings
-    {
-
-    }
-}
 """;
         }
 
@@ -3450,12 +3417,9 @@ namespace {{appName}}.Business
 
   <ItemGroup>
     <Folder Include="DataMappers\" />
-    <Folder Include="DTO\Helpers" />
-    <Folder Include="DTO\Partials" />
     <Folder Include="Entities\" />
     <Folder Include="Enums\" />
     <Folder Include="Services\" />
-    <Folder Include="ValidationRules\" />
   </ItemGroup>
 
     <ItemGroup>
@@ -3479,21 +3443,6 @@ namespace {{appName}}.Business
 	</ItemGroup>
 
 </Project>
-""";
-        }
-
-        private static string GetBusinessGeneratorSettingsData(string appName)
-        {
-            return $$"""
-using Spiderly.Shared.Attributes;
-
-namespace {{appName}}.Business.GeneratorSettings
-{
-    public class GeneratorSettings
-    {
-        
-    }
-}
 """;
         }
 
