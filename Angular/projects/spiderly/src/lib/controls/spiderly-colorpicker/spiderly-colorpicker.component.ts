@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { BaseControl } from '../base-control';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { RequiredComponent } from '../../components/required/required.component';
@@ -6,21 +6,24 @@ import { CommonModule } from '@angular/common';
 import { TranslocoService } from '@jsverse/transloco';
 import { ColorPickerModule } from 'primeng/colorpicker';
 import { TooltipModule } from 'primeng/tooltip';
+import { InputTextModule } from 'primeng/inputtext';
 
 @Component({
-    selector: 'spiderly-colorpick',
-    templateUrl: './spiderly-colorpick.component.html',
+    selector: 'spiderly-colorpicker',
+    templateUrl: './spiderly-colorpicker.component.html',
     styles: [],
     imports: [
         CommonModule,
         ReactiveFormsModule,
         FormsModule,
         ColorPickerModule,
+        InputTextModule,
         TooltipModule,
         RequiredComponent
     ]
 })
-export class SpiderlyColorpickComponent extends BaseControl implements OnInit {
+export class SpiderlyColorPickerComponent extends BaseControl implements OnInit {
+    @Input() showInputTextField: boolean = true;
 
     constructor(
         protected override translocoService: TranslocoService,
@@ -34,7 +37,7 @@ export class SpiderlyColorpickComponent extends BaseControl implements OnInit {
         });
 
         if (this.control.value == null)
-            this.placeholder = this.translocoService.translate('SelectAColor');
+            this.placeholder = this.translocoService.translate('ColorPickerPlaceholder');
 
         super.ngOnInit();
     }

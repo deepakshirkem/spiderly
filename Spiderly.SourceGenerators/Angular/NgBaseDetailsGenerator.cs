@@ -1383,7 +1383,7 @@ export class {{entity.Name}}BaseDetailsComponent {
                 case UIControlTypeCodes.CheckBox:
                     return "spiderly-checkbox";
                 case UIControlTypeCodes.ColorPick:
-                    return "spiderly-colorpick";
+                    return "spiderly-colorpicker";
                 case UIControlTypeCodes.Dropdown:
                     return "spiderly-dropdown";
                 case UIControlTypeCodes.Editor:

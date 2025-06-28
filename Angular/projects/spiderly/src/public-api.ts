@@ -8,7 +8,7 @@ export * from './lib/modules/spiderly-transloco.module';
 export * from './lib/controls/spiderly-autocomplete/spiderly-autocomplete.component';
 export * from './lib/controls/spiderly-calendar/spiderly-calendar.component';
 export * from './lib/controls/spiderly-checkbox/spiderly-checkbox.component';
-export * from './lib/controls/spiderly-colorpick/spiderly-colorpick.component';
+export * from './lib/controls/spiderly-colorpicker/spiderly-colorpicker.component';
 export * from './lib/controls/spiderly-dropdown/spiderly-dropdown.component';
 export * from './lib/controls/spiderly-editor/spiderly-editor.component';
 export * from './lib/controls/spiderly-file/spiderly-file.component';

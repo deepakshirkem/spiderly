@@ -116,7 +116,7 @@ namespace {{basePartOfNamespace}}.DataMappers
             string result = $$"""
         public static TypeAdapterConfig {{methodName}}()
         {
-            TypeAdapterConfig config = new TypeAdapterConfig();
+            TypeAdapterConfig config = new();
 
             config
                 .NewConfig<{{entity.Name}}DTO, {{entity.Name}}>()
@@ -186,7 +186,7 @@ namespace {{basePartOfNamespace}}.DataMappers
             return $$"""
         public static TypeAdapterConfig {{methodName}}()
         {
-            TypeAdapterConfig config = new TypeAdapterConfig();
+            TypeAdapterConfig config = new();
 
             config
                 .NewConfig<{{entity.Name}}, {{entity.Name}}DTO>()
