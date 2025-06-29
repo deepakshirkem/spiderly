@@ -97,6 +97,8 @@ export class MenuitemComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
+        this.item.visible = this.item.visible ?? true;
+
         this.key = this.parentKey ? this.parentKey + '-' + this.index : String(this.index);
         
         if (this.item.routerLink) {

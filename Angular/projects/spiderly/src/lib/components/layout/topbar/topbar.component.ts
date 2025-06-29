@@ -52,7 +52,7 @@ export class TopBarComponent {
         this.hideMenuItemsBasedOnPermissions(menuItem.items, currentUserPermissionCodes)
       }
       if (typeof menuItem.hasPermission === 'function') {
-        menuItem.visible = menuItem.hasPermission(currentUserPermissionCodes);
+        menuItem.visible = menuItem.hasPermission(currentUserPermissionCodes) ?? false;
       }
     });
   }

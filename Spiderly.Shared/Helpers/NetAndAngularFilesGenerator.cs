@@ -5051,18 +5051,15 @@ export class LayoutComponent {
     ngOnInit(): void {
         this.menu = [
             {
-                visible: true,
                 items: [
                     { 
                         label: this.translocoService.translate('Home'), 
                         icon: 'pi pi-fw pi-home', 
                         routerLink: [''],
-                        visible: true,
                     },
                     {
                         label: this.translocoService.translate('Administration'),
                         icon: 'pi pi-fw pi-cog',
-                        visible: true,
                         hasPermission: (permissionCodes: string[]): boolean => { 
                             return (
                                 permissionCodes?.includes(BusinessPermissionCodes.ReadUser) ||
@@ -5080,7 +5077,6 @@ export class LayoutComponent {
                                         permissionCodes?.includes(BusinessPermissionCodes.ReadUser)
                                     )
                                 },
-                                visible: true,
                             },
                             {
                                 label: this.translocoService.translate('RoleList'),
@@ -5091,7 +5087,6 @@ export class LayoutComponent {
                                         permissionCodes?.includes(SecurityPermissionCodes.ReadRole)
                                     )
                                 },
-                                visible: true,
                             },
                             {
                                 label: this.translocoService.translate('NotificationList'),
@@ -5102,7 +5097,6 @@ export class LayoutComponent {
                                         permissionCodes?.includes(BusinessPermissionCodes.ReadNotification)
                                     )
                                 },
-                                visible: true,
                             },
                         ]
                     },
