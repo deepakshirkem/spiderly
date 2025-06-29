@@ -51,6 +51,9 @@ export class RoleBaseDetailsComponent {
     @Input() formGroup: SpiderlyFormGroup;
     @Input() roleFormGroup: SpiderlyFormGroup<Role>;
     @Input() additionalButtons: SpiderlyButton[] = [];
+    @Input() panelTitle: string;
+    @Input() showBigPanelTitle: boolean = true;
+    @Input() panelIcon: string;
 
     authorizationForSaveSubscription: Subscription;
     @Input() authorizedForSaveObservable: () => Observable<boolean> = () => of(false);

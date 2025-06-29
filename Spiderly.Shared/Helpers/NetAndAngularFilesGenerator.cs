@@ -585,16 +585,15 @@ export class {{entityName}}DetailsComponent extends BaseFormCopy implements OnIn
 
             return $$"""
 <ng-container *transloco="let t">
-    <spiderly-card [title]="t('{{entityName}}')" icon="pi pi-file-edit">
 
-        <{{kebabEntityName}}-base-details
-        [formGroup]="formGroup" 
-        [{{entityName.FirstCharToLower()}}FormGroup]="{{entityName.FirstCharToLower()}}FormGroup" 
-        (onSave)="onSave()"
-        [getCrudMenuForOrderedData]="getCrudMenuForOrderedData"
-        />
+    <{{kebabEntityName}}-base-details
+    [panelTitle]="t('{{entityName}}')"
+    [formGroup]="formGroup" 
+    [{{entityName.FirstCharToLower()}}FormGroup]="{{entityName.FirstCharToLower()}}FormGroup" 
+    (onSave)="onSave()"
+    [getCrudMenuForOrderedData]="getCrudMenuForOrderedData"
+    />
 
-    </spiderly-card>
 </ng-container>
 """;
         }
@@ -737,6 +736,7 @@ export class {{entityName}}ListComponent implements OnInit {
         </spiderly-panel>
 
         <notification-base-details
+        [showBigPanelTitle]="false"
         [formGroup]="formGroup" 
         [notificationFormGroup]="notificationFormGroup" 
         (onSave)="onSave()"
@@ -897,15 +897,15 @@ export class NotificationListComponent implements OnInit {
         {
             return $$"""
 <ng-container *transloco="let t">
-    <spiderly-card [title]="t('Role')" icon="pi pi-id-card">
 
-        <role-base-details 
-        [formGroup]="formGroup" 
-        [roleFormGroup]="roleFormGroup" 
-        (onSave)="onSave()" 
-        ></role-base-details>
+    <role-base-details 
+    [panelTitle]="t('Role')"
+    panelIcon="pi pi-id-card"
+    [formGroup]="formGroup" 
+    [roleFormGroup]="roleFormGroup" 
+    (onSave)="onSave()" 
+    ></role-base-details>
 
-    </spiderly-card>
 </ng-container>
 """;
         }
@@ -1011,8 +1011,9 @@ export class RoleListComponent implements OnInit {
         {
             return $$"""
 <ng-container *transloco="let t">
-    <user-extended-base-details
+    <user-base-details
     [panelTitle]="userFormGroup.getRawValue().email ?? null"
+    [showBigPanelTitle]="false"
     panelIcon="pi pi-user"
     [formGroup]="formGroup" 
     [userFormGroup]="userFormGroup" 
@@ -1022,7 +1023,7 @@ export class RoleListComponent implements OnInit {
     [showReturnButton]="false"
     [authorizedForSaveObservable]="authorizedForSaveObservable"
     (onIsAuthorizedForSaveChange)="isAuthorizedForSaveChange($event)"
-    ></user-extended-base-details>
+    ></user-base-details>
 </ng-container>
 """;
         }

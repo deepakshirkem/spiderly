@@ -17,7 +17,7 @@ namespace Spiderly.Shared.Enums
         CheckBox,
         Calendar,
         Integer,
-        ColorPick,
+        ColorPicker,
         Editor,
         MultiAutocomplete,
         MultiSelect,

@@ -378,7 +378,7 @@ namespace Spiderly.SourceGenerators.Shared
 
         public static bool IsColorControlType(this SpiderlyProperty property)
         {
-            return property.Attributes.Any(x => x.Name == "UIControlType" && x.Value == UIControlTypeCodes.ColorPick.ToString());
+            return property.Attributes.Any(x => x.Name == "UIControlType" && x.Value == UIControlTypeCodes.ColorPicker.ToString());
         }
 
         public static bool IsMultiSelectControlType(this SpiderlyProperty property)

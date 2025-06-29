@@ -103,7 +103,7 @@ namespace Spiderly.SourceGenerators.Angular
     template: `
 <ng-container *transloco="let t">
     <spiderly-panel [isFirstMultiplePanel]="isFirstMultiplePanel" [isMiddleMultiplePanel]="isMiddleMultiplePanel" [isLastMultiplePanel]="isLastMultiplePanel" [showPanelHeader]="showPanelHeader" >
-        <panel-header [title]="panelTitle" [icon]="panelIcon"></panel-header>
+        <panel-header [title]="panelTitle" [showBigTitle]="showBigPanelTitle" [icon]="panelIcon"></panel-header>
 
         <panel-body>
             @defer (when loading === false) {
@@ -150,6 +150,7 @@ export class {{entity.Name}}BaseDetailsComponent {
     @Input() isLastMultiplePanel: boolean = false;
     @Input() showPanelHeader: boolean = true;
     @Input() panelTitle: string;
+    @Input() showBigPanelTitle: boolean = true;
     @Input() panelIcon: string;
     @Input() showReturnButton: boolean = true;
     authorizationForSaveSubscription: Subscription;
@@ -324,22 +325,30 @@ export class {{entity.Name}}BaseDetailsComponent {
 
             foreach (SpiderlyProperty property in properties)
             {
-                if (property.IsDropdownControlType())
+                UIControlTypeCodes controlType = GetUIControlType(property);
+
+                if (controlType == UIControlTypeCodes.Dropdown)
                 {               
                 sb.AppendLine($$"""
     @Output() on{{property.Name}}For{{property.EntityName}}Change = new EventEmitter<DropdownChangeEvent>();
 """);
                 }
-                else if (property.Type.StartsWith("DateTime"))
+                else if (controlType == UIControlTypeCodes.Calendar)
                 {
                     sb.AppendLine($$"""
     @Input() showTimeOn{{property.Name}}For{{property.EntityName}} = false;
 """);
                 }
-                else if (property.Type.StartsWith("bool"))
+                else if (controlType == UIControlTypeCodes.CheckBox)
                 {
                     sb.AppendLine($$"""
     @Output() on{{property.Name}}For{{property.EntityName}}Change = new EventEmitter<CheckboxChangeEvent>();
+""");
+                }
+                else if (controlType == UIControlTypeCodes.ColorPicker)
+                {
+                    sb.AppendLine($$"""
+    @Input() show{{property.Name}}TextFieldFor{{property.EntityName}} = true;
 """);
                 }
             }
@@ -1296,6 +1305,10 @@ export class {{entity.Name}}BaseDetailsComponent {
                             (onIsAllSelectedChange)="areAll{{property.Name}}SelectedChangeFor{{entity.Name}}($event)"
 """;
             }
+            else if (controlType == UIControlTypeCodes.ColorPicker)
+            {
+                return $"[control]=\"{GetControlHtmlAttributeValue(property, entity)}\" [showInputTextField]=\"show{property.Name}TextFieldFor{entity.Name}\"";
+            }
 
             return $"[control]=\"{GetControlHtmlAttributeValue(property, entity)}\"";
         }
@@ -1382,7 +1395,7 @@ export class {{entity.Name}}BaseDetailsComponent {
                     return "spiderly-calendar";
                 case UIControlTypeCodes.CheckBox:
                     return "spiderly-checkbox";
-                case UIControlTypeCodes.ColorPick:
+                case UIControlTypeCodes.ColorPicker:
                     return "spiderly-colorpicker";
                 case UIControlTypeCodes.Dropdown:
                     return "spiderly-dropdown";
