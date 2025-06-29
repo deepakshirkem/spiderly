@@ -40,15 +40,6 @@ export class SpiderlyCheckboxComponent extends BaseControl implements OnInit {
     }
 
     change = (event: CheckboxChangeEvent) => {
-        if (this.control.value === false) 
-            this.control.setValue(null);
-        else if (this.control.value === true) 
-            this.control.setValue(false);
-        else 
-            this.control.setValue(true);
-
-        event.checked = this.control.value;
-
         this.onChange.next(event);
     }
 }

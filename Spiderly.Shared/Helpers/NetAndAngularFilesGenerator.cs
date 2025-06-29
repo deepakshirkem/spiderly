@@ -729,7 +729,7 @@ export class {{entityName}}ListComponent implements OnInit {
             <panel-body>
                 <div class="grid">
                     <div class="col-12">
-                        <spiderly-checkbox [control]="isMarkedAsRead" [label]="t('NotifyUsers')" [fakeLabel]="false"></spiderly-checkbox>
+                        <spiderly-checkbox [control]="isMarkedAsRead" [label]="t('NotifyUsers')"/>
                     </div>
                 </div>
             </panel-body>
@@ -4289,7 +4289,10 @@ export const ThemePreset = definePreset(Aura, {
     "NotFoundTitle": "Nije pronađeno",
     "UnexpectedErrorTitle": "Dogodila se greška",
     "UnexpectedErrorDetails": "Naš tim je obavešten i radimo na rešenju problema. Molimo Vas da pokušate ponovo kasnije.",
-    "ColorPickerPlaceholder": "e.g., #ff0000",
+    "ColorPickerPlaceholder": "npr. #ff0000",
+    "True": "Da",
+    "False": "Ne",
+    "Empty": "Prazno",
     "DatesBefore": "Datumi pre",
     "DatesAfter": "Datumi posle",
     "Equals": "Jednako",
@@ -4569,6 +4572,9 @@ export const ThemePreset = definePreset(Aura, {
   "UnexpectedErrorTitle": "An error occurred",
   "UnexpectedErrorDetails": "Our team has been notified and we are working on a solution. Please try again later.",
   "ColorPickerPlaceholder": "e.g., #ff0000",
+  "True": "True",
+  "False": "False",
+  "Empty": "Empty",
   "Revert": "Revert to state",
   "DatesBefore": "Dates before",
   "DatesAfter": "Dates after",
