@@ -139,38 +139,35 @@ namespace Spiderly.Shared.Helpers
         #region SQL Server
 
         /// <summary>
-        /// Attempts to connect using the default SQL Server instance.
-        /// If it fails, falls back to SQL Express instance.
+        /// Attempts to find an available SQL Server connection string by checking common data sources.
         /// </summary>
         public static string GetAvailableSqlServerConnectionString(string databaseName)
         {
-            SqlConnectionStringBuilder defaultInstance = BuildConnectionString(useSqlExpress: false);
-
-            if (TryConnect(defaultInstance))
+            List<string> dataSources = new List<string>
             {
-                defaultInstance.InitialCatalog = databaseName;
-                return defaultInstance.ConnectionString;
+                "localhost",
+                @"localhost\SQLEXPRESS",
+                @"(localdb)\MSSQLLocalDB"
+            };
+
+            foreach (string dataSource in dataSources)
+            {
+                SqlConnectionStringBuilder connectionStringBuilder = BuildConnectionString(dataSource);
+                if (TryConnect(connectionStringBuilder))
+                {
+                    connectionStringBuilder.InitialCatalog = databaseName;
+                    return connectionStringBuilder.ConnectionString;
+                }
             }
 
-            SqlConnectionStringBuilder expressInstance = BuildConnectionString(useSqlExpress: true);
-
-            if (TryConnect(expressInstance))
-            {
-                expressInstance.InitialCatalog = databaseName;
-                expressInstance.DataSource = @"localhost\\SQLEXPRESS";
-                return expressInstance.ConnectionString;
-            }
-
-            return defaultInstance.ConnectionString;
+            return null;
         }
 
         /// <summary>
         /// Constructs a SQL Server connection string for either the default or SQL Express instance.
         /// </summary>
-        public static SqlConnectionStringBuilder BuildConnectionString(bool useSqlExpress)
+        public static SqlConnectionStringBuilder BuildConnectionString(string dataSource)
         {
-            string dataSource = useSqlExpress ? @"localhost\SQLEXPRESS" : "localhost";
-
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder
             {
                 DataSource = dataSource,

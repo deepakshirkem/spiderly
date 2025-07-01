@@ -13,7 +13,7 @@ namespace Spiderly.Shared.Helpers
         /// <summary>
         /// Generates the starter project template for a Spiderly application, including both backend and frontend components.
         /// </summary>
-        public static void Generate(string outputPath, string appName, string spiderlyVersion, bool isFromNuget, string primaryColor, bool hasTopMenu)
+        public static void Generate(string outputPath, string appName, string spiderlyVersion, bool isRunningFromNuget, string primaryColor, bool hasTopMenu)
         {
             string jwtKey = GenerateJwtSecretKey();
 
@@ -254,7 +254,7 @@ namespace Spiderly.Shared.Helpers
                                         Files =
                                         {
                                             new SpiderlyFile { Name = "primeng-theme.ts", Data = GetPrimeNGThemeTsData() },
-                                            new SpiderlyFile { Name = "styles.scss", Data = GetStylesScssData(isFromNuget) },
+                                            new SpiderlyFile { Name = "styles.scss", Data = GetStylesScssData(isRunningFromNuget) },
                                         }
                                     },
                                     new SpiderlyFolder
@@ -279,9 +279,9 @@ namespace Spiderly.Shared.Helpers
                             new SpiderlyFile { Name = ".editorconfig", Data = GetEditOrConfigData() },
                             new SpiderlyFile { Name = "angular.json", Data = GetAngularJsonData(appName) },
                             new SpiderlyFile { Name = "package.json", Data = GetPackageJsonData(appName, spiderlyVersion) },
-                            new SpiderlyFile { Name = "README.md", Data = "" },
+                            new SpiderlyFile { Name = "README.md", Data = GetFrontendREADMEData(appName, spiderlyVersion) },
                             new SpiderlyFile { Name = "tsconfig.app.json", Data = GetTsConfigAppJsonData() },
-                            new SpiderlyFile { Name = "tsconfig.json", Data = GetTsConfigJsonData(isFromNuget) },
+                            new SpiderlyFile { Name = "tsconfig.json", Data = GetTsConfigJsonData(isRunningFromNuget) },
                             new SpiderlyFile { Name = "tsconfig.spec.json", Data = GetTsConfigSpecJsonData() },
                             new SpiderlyFile { Name = "vercel.json", Data = GetVercelJsonData() },
                         }
@@ -343,7 +343,7 @@ namespace Spiderly.Shared.Helpers
                                 },
                                 Files =
                                 {
-                                    new SpiderlyFile { Name = $"{appName}.Business.csproj", Data = GetBusinessCsProjData(appName, spiderlyVersion, isFromNuget) },
+                                    new SpiderlyFile { Name = $"{appName}.Business.csproj", Data = GetBusinessCsProjData(appName, spiderlyVersion, isRunningFromNuget) },
                                     new SpiderlyFile { Name = $"Settings.cs", Data = GetBusinessSettingsCsData(appName) },
                                 }
                             },
@@ -353,7 +353,7 @@ namespace Spiderly.Shared.Helpers
                                 Files =
                                 {
                                     new SpiderlyFile { Name = $"{appName}ApplicationDbContext.cs", Data = GetInfrastructureApplicationDbContextData(appName) },
-                                    new SpiderlyFile { Name = $"{appName}.Infrastructure.csproj", Data = GetInfrastructureCsProjData(appName, spiderlyVersion, isFromNuget) },
+                                    new SpiderlyFile { Name = $"{appName}.Infrastructure.csproj", Data = GetInfrastructureCsProjData(appName, spiderlyVersion, isRunningFromNuget) },
                                 }
                             },
                             new SpiderlyFolder
@@ -385,7 +385,7 @@ namespace Spiderly.Shared.Helpers
                                 },
                                 Files =
                                 {
-                                    new SpiderlyFile { Name = $"{appName}.Shared.csproj", Data = GetSharedCsProjData(spiderlyVersion, isFromNuget) },
+                                    new SpiderlyFile { Name = $"{appName}.Shared.csproj", Data = GetSharedCsProjData(spiderlyVersion, isRunningFromNuget) },
                                 }
                             },
                             new SpiderlyFolder
@@ -431,7 +431,7 @@ namespace Spiderly.Shared.Helpers
                                         blobStorageUrl: null,
                                         sqlServerConnectionString: sqlServerConnectionString
                                     )},
-                                    new SpiderlyFile { Name = $"{appName}.WebAPI.csproj", Data = GetWebAPICsProjData(appName, spiderlyVersion, isFromNuget) },
+                                    new SpiderlyFile { Name = $"{appName}.WebAPI.csproj", Data = GetWebAPICsProjData(appName, spiderlyVersion, isRunningFromNuget) },
                                     new SpiderlyFile { Name = $"{appName}.WebAPI.csproj.user", Data = GetWebAPICsProjUserData() },
                                     new SpiderlyFile { Name = "Program.cs", Data = GetProgramCsData(appName) },
                                     new SpiderlyFile { Name = "Settings.cs", Data = GetWebAPISettingsCsData(appName) },
@@ -456,6 +456,7 @@ namespace Spiderly.Shared.Helpers
                 Files =
                 {
                     new SpiderlyFile { Name = ".gitignore", Data = GetGitIgnoreData() },
+                    new SpiderlyFile { Name = "README.md", Data = GetREADMEData(appName, spiderlyVersion) },
                 }
             };
 
@@ -2996,7 +2997,7 @@ namespace {{appName}}.WebAPI
 """;
         }
 
-        private static string GetWebAPICsProjData(string appName, string spiderlyVersion, bool isFromNuget)
+        private static string GetWebAPICsProjData(string appName, string spiderlyVersion, bool isRunningFromNuget)
         {
             return $$"""
 <Project Sdk="Microsoft.NET.Sdk.Web">
@@ -3030,11 +3031,11 @@ namespace {{appName}}.WebAPI
 
 	<ItemGroup>
 {{XmlCommented("""
-        <ProjectReference Include="..\..\..\..\Spiderly\spiderly\Spiderly.Infrastructure\Spiderly.Infrastructure.csproj" />
-        <ProjectReference Include="..\..\..\..\Spiderly\spiderly\Spiderly.Security\Spiderly.Security.csproj" />
-        <ProjectReference Include="..\..\..\..\Spiderly\spiderly\Spiderly.Shared\Spiderly.Shared.csproj" />
-        <ProjectReference Include="..\..\..\..\Spiderly\spiderly\Spiderly.SourceGenerators\Spiderly.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-""", isFromNuget)}}
+        <ProjectReference Include="..\..\..\spiderly\Spiderly.Infrastructure\Spiderly.Infrastructure.csproj" />
+        <ProjectReference Include="..\..\..\spiderly\Spiderly.Security\Spiderly.Security.csproj" />
+        <ProjectReference Include="..\..\..\spiderly\Spiderly.Shared\Spiderly.Shared.csproj" />
+        <ProjectReference Include="..\..\..\spiderly\Spiderly.SourceGenerators\Spiderly.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+""", isRunningFromNuget)}}
 		<ProjectReference Include="..\{{appName}}.Business\{{appName}}.Business.csproj" />
 		<ProjectReference Include="..\{{appName}}.Infrastructure\{{appName}}.Infrastructure.csproj" />
 		<ProjectReference Include="..\{{appName}}.Shared\{{appName}}.Shared.csproj" />
@@ -3054,7 +3055,7 @@ namespace {{appName}}.WebAPI
         <PackageReference Include="Spiderly.Security" Version="{{spiderlyVersion}}" />
         <PackageReference Include="Spiderly.Shared" Version="{{spiderlyVersion}}" />
         <PackageReference Include="Spiderly.SourceGenerators" Version="{{spiderlyVersion}}" />
-""", !isFromNuget)}}
+""", !isRunningFromNuget)}}
 	</ItemGroup>
 
 </Project>
@@ -3144,7 +3145,7 @@ namespace {{appName}}.WebAPI
       "BlobStorageUrl": "{{blobStorageUrl}}",
       "BlobStorageContainerName": "files-dev",
 
-      "ConnectionString": "{{sqlServerConnectionString}}",
+      "ConnectionString": "{{sqlServerConnectionString?.Replace(@"\", @"\\")}}",
 
       "RequestsLimitNumber": 120,
       "RequestsLimitWindow": 60
@@ -3267,7 +3268,7 @@ namespace {{appName}}.WebAPI.DI
 """;
         }
 
-        private static string GetSharedCsProjData(string version, bool isFromNuget)
+        private static string GetSharedCsProjData(string version, bool isRunningFromNuget)
         {
             return $$"""
 <Project Sdk="Microsoft.NET.Sdk">
@@ -3279,8 +3280,8 @@ namespace {{appName}}.WebAPI.DI
 
   <ItemGroup>
 {{XmlCommented($$"""
-        <ProjectReference Include="..\..\..\..\Spiderly\spiderly\Spiderly.Shared\Spiderly.Shared.csproj" />
-""", isFromNuget)}}
+        <ProjectReference Include="..\..\..\spiderly\Spiderly.Shared\Spiderly.Shared.csproj" />
+""", isRunningFromNuget)}}
   </ItemGroup>
 
   <ItemGroup>
@@ -3297,7 +3298,7 @@ namespace {{appName}}.WebAPI.DI
 		<PackageReference Include="System.Net.Primitives" Version="4.3.0" />
 {{XmlCommented($$"""
         <PackageReference Include="Spiderly.Shared" Version="{{version}}" />
-""", !isFromNuget)}}
+""", !isRunningFromNuget)}}
 	</ItemGroup>
 
     <ItemGroup>
@@ -3331,7 +3332,7 @@ namespace {{appName}}.WebAPI.DI
 """;
         }
 
-        private static string GetInfrastructureCsProjData(string appName, string version, bool isFromNuget)
+        private static string GetInfrastructureCsProjData(string appName, string version, bool isRunningFromNuget)
         {
             return $$"""
 <Project Sdk="Microsoft.NET.Sdk">
@@ -3346,8 +3347,8 @@ namespace {{appName}}.WebAPI.DI
 
 	<ItemGroup>
 {{XmlCommented($$"""
-		<ProjectReference Include="..\..\..\..\Spiderly\spiderly\Spiderly.Infrastructure\Spiderly.Infrastructure.csproj" />
-""", isFromNuget)}}
+		<ProjectReference Include="..\..\..\spiderly\Spiderly.Infrastructure\Spiderly.Infrastructure.csproj" />
+""", isRunningFromNuget)}}
 		<ProjectReference Include="..\{{appName}}.Business\{{appName}}.Business.csproj" />
 		<ProjectReference Include="..\{{appName}}.Shared\{{appName}}.Shared.csproj" />
 	</ItemGroup>
@@ -3367,7 +3368,7 @@ namespace {{appName}}.WebAPI.DI
 		<PackageReference Include="System.Net.Primitives" Version="4.3.0" />
 {{XmlCommented($$"""
         <PackageReference Include="Spiderly.Infrastructure" Version="{{version}}" />
-""", !isFromNuget)}}
+""", !isRunningFromNuget)}}
 	</ItemGroup>
 
 </Project>
@@ -3398,7 +3399,7 @@ namespace {{appName}}.Business
 """;
         }
 
-        private static string GetBusinessCsProjData(string appName, string version, bool isFromNuget)
+        private static string GetBusinessCsProjData(string appName, string version, bool isRunningFromNuget)
         {
             return $$"""
 <Project Sdk="Microsoft.NET.Sdk">
@@ -3410,9 +3411,9 @@ namespace {{appName}}.Business
 
   <ItemGroup>
 {{XmlCommented($$"""
-    <ProjectReference Include="..\..\..\..\Spiderly\spiderly\Spiderly.Security\Spiderly.Security.csproj" />
-    <ProjectReference Include="..\..\..\..\Spiderly\spiderly\Spiderly.SourceGenerators\Spiderly.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-""", isFromNuget)}}
+    <ProjectReference Include="..\..\..\spiderly\Spiderly.Security\Spiderly.Security.csproj" />
+    <ProjectReference Include="..\..\..\spiderly\Spiderly.SourceGenerators\Spiderly.SourceGenerators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+""", isRunningFromNuget)}}
     <ProjectReference Include="..\{{appName}}.Shared\{{appName}}.Shared.csproj" />
   </ItemGroup>
 
@@ -3440,7 +3441,7 @@ namespace {{appName}}.Business
 {{XmlCommented($$"""
         <PackageReference Include="Spiderly.Security" Version="{{version}}" />
         <PackageReference Include="Spiderly.SourceGenerators" Version="{{version}}" />
-""", !isFromNuget)}}
+""", !isRunningFromNuget)}}
 	</ItemGroup>
 
 </Project>
@@ -3787,7 +3788,7 @@ namespace {{appName}}.Business.DataMappers
 """;
         }
 
-        private static string GetTsConfigJsonData(bool isFromNuget)
+        private static string GetTsConfigJsonData(bool isRunningFromNuget)
         {
             return $$"""
 /* To learn more about this file see: https://angular.io/config/tsconfig. */
@@ -3797,8 +3798,8 @@ namespace {{appName}}.Business.DataMappers
     "baseUrl": "./",
     "paths": {
 {{SlashCommented($$"""
-        "spiderly": ["../../../Spiderly/spiderly/Angular/projects/spiderly/src/public-api"]
-""", isFromNuget)}} 
+        "spiderly": ["../../spiderly/Angular/projects/spiderly/src/public-api"]
+""", isRunningFromNuget)}} 
     },
     "outDir": "./dist/out-tsc",
     "esModuleInterop": true,
@@ -4176,7 +4177,7 @@ export const ThemePreset = definePreset(Aura, {
 """;
         }
 
-        private static string GetStylesScssData(bool isFromNuget)
+        private static string GetStylesScssData(bool isRunningFromNuget)
         {
             return $$"""
 //#region PrimeNG
@@ -4189,12 +4190,12 @@ export const ThemePreset = definePreset(Aura, {
 //#region Spiderly
 
 {{SlashCommented("""
-@use "../../../../../Spiderly/spiderly/Angular/projects/spiderly/src/lib/styles/styles.scss";
-""", isFromNuget)}}
+@use "../../../../spiderly/Angular/projects/spiderly/src/lib/styles/styles.scss";
+""", isRunningFromNuget)}}
 
 {{SlashCommented("""
 @use "../../node_modules/spiderly/styles/styles/styles.scss";
-""", !isFromNuget)}}
+""", !isRunningFromNuget)}}
 
 //#endregion
 """;
@@ -5170,6 +5171,33 @@ export class LayoutComponent {
 # System files
 **/.DS_Store
 **/Thumbs.db
+""";
+        }
+
+        private static string GetREADMEData(string appName, string spiderlyVersion)
+        {
+            return $$"""
+# {{appName}}
+This project was generated with [Spiderly CLI](https://github.com/filiptrivan/spiderly/tree/main/Spiderly.CLI) version {{spiderlyVersion}}.
+
+For more information about Spiderly, visit our [documentation](https://www.spiderly.dev/docs/getting-started).
+""";
+        }
+
+        private static string GetFrontendREADMEData(string appName, string spiderlyVersion)
+        {
+            return $$"""
+# {{appName}}
+This project was generated with [Spiderly CLI](https://github.com/filiptrivan/spiderly/tree/main/Spiderly.CLI) version {{spiderlyVersion}}.
+
+## Development server
+Run `ng serve` for a dev server. Navigate to http://localhost:4200/. The app will automatically reload if you change any of the source files.
+
+## Code scaffolding
+Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|module`.
+
+### Further help
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/main/README.md).
 """;
         }
 

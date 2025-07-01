@@ -219,9 +219,6 @@
   <data name="User" xml:space="preserve">
     <value>Korisnik</value>
   </data>
-  <data name="User" xml:space="preserve">
-    <value>Korisnik</value>
-  </data>
   <data name="BirthDate" xml:space="preserve">
     <value>Datum rođenja</value>
   </data>

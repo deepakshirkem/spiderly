@@ -252,10 +252,6 @@
     <value>User</value>
     <comment>Korisnik</comment>
   </data>
-  <data name="User" xml:space="preserve">
-    <value>User</value>
-    <comment>Korisnik</comment>
-  </data>
   <data name="BirthDate" xml:space="preserve">
     <value>Birth date</value>
     <comment>Datum rođenja</comment>

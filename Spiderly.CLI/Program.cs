@@ -40,6 +40,11 @@ namespace Spiderly.CLI
                     hasTopMenu = true;
                 }
 
+                if (args.HasArg("--"))
+                {
+                    
+                }
+
                 await Init(hasTopMenu);
                 return;
             }
@@ -58,7 +63,6 @@ namespace Spiderly.CLI
 
             Console.WriteLine("\nUnrecognized command. Type 'spiderly help' to see a list of available commands.");
         }
-
 
         private static void ShowHelp()
         {
@@ -121,7 +125,7 @@ namespace Spiderly.CLI
             Console.WriteLine("\nGenerating files for the app...");
             try
             {
-                NetAndAngularFilesGenerator.Generate(currentPath, appName, version, isFromNuget: true, primaryColor: null, hasTopMenu);
+                NetAndAngularFilesGenerator.Generate(currentPath, appName, version, isRunningFromNuget: IsRunningFromNuget(), primaryColor: null, hasTopMenu);
                 Console.WriteLine("Finished generating files for the app.");
             }
             catch (Exception ex)
@@ -315,9 +319,30 @@ namespace Spiderly.CLI
 
         #endregion
 
+        #region Helpers
+
         private static bool HasArg(this string[] args, string arg)
         {
             return Array.Exists(args, a => a.Equals(arg, StringComparison.OrdinalIgnoreCase));
         }
+
+        private static bool IsRunningFromNuget()
+        {
+            string exePath = Process.GetCurrentProcess().MainModule?.FileName;
+
+            if (string.IsNullOrEmpty(exePath))
+                return true;
+
+            return exePath.Contains(".dotnet\\tools") ||  // Windows
+                   exePath.Contains("/.dotnet/tools") ||  // Linux/macOS
+                   (
+                        !exePath.Contains("\\bin\\Debug\\") && 
+                        !exePath.Contains("/bin/Debug/") &&
+                        !exePath.Contains("\\bin\\Release\\") && 
+                        !exePath.Contains("/bin/Release/")
+                   );
+        }
+
+        #endregion
     }
 }
