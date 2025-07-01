@@ -278,7 +278,7 @@ namespace Spiderly.Shared.Helpers
                         {
                             new SpiderlyFile { Name = ".editorconfig", Data = GetEditOrConfigData() },
                             new SpiderlyFile { Name = "angular.json", Data = GetAngularJsonData(appName) },
-                            new SpiderlyFile { Name = "package.json", Data = GetPackageJsonData(appName, spiderlyVersion) },
+                            new SpiderlyFile { Name = "package.json", Data = GetPackageJsonData(appName, spiderlyVersion, isRunningFromNuget) },
                             new SpiderlyFile { Name = "README.md", Data = GetFrontendREADMEData(appName, spiderlyVersion) },
                             new SpiderlyFile { Name = "tsconfig.app.json", Data = GetTsConfigAppJsonData() },
                             new SpiderlyFile { Name = "tsconfig.json", Data = GetTsConfigJsonData(isRunningFromNuget) },
@@ -3860,7 +3860,7 @@ namespace {{appName}}.Business.DataMappers
 """;
         }
 
-        private static string GetPackageJsonData(string appName, string version)
+        private static string GetPackageJsonData(string appName, string version, bool isRunningFromNuget)
         {
             return $$"""
 {
@@ -3877,7 +3877,10 @@ namespace {{appName}}.Business.DataMappers
     },
     "private": true,
     "dependencies": {
+{{(isRunningFromNuget /* Note: Can't comment it out because it's json */ ? $$"""
         "spiderly": "{{version}}",
+""" : "")
+}}
         "@abacritt/angularx-social-login": "2.2.0",
         "@angular/animations": "19.2.13",
         "@angular/common": "19.2.13",

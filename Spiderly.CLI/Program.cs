@@ -40,12 +40,13 @@ namespace Spiderly.CLI
                     hasTopMenu = true;
                 }
 
-                if (args.HasArg("--"))
+                bool IsRunningFromNuget = true;
+                if (args.HasArg("--dev"))
                 {
-                    
+                    IsRunningFromNuget = false;
                 }
 
-                await Init(hasTopMenu);
+                await Init(hasTopMenu, IsRunningFromNuget);
                 return;
             }
 
@@ -84,7 +85,7 @@ namespace Spiderly.CLI
 
         #region Init
 
-        private static async Task Init(bool hasTopMenu)
+        private static async Task Init(bool hasTopMenu, bool IsRunningFromNuget)
         {
             Assembly assembly = Assembly.GetExecutingAssembly();
 
@@ -125,7 +126,7 @@ namespace Spiderly.CLI
             Console.WriteLine("\nGenerating files for the app...");
             try
             {
-                NetAndAngularFilesGenerator.Generate(currentPath, appName, version, isRunningFromNuget: IsRunningFromNuget(), primaryColor: null, hasTopMenu);
+                NetAndAngularFilesGenerator.Generate(currentPath, appName, version, IsRunningFromNuget, primaryColor: null, hasTopMenu);
                 Console.WriteLine("Finished generating files for the app.");
             }
             catch (Exception ex)
@@ -324,23 +325,6 @@ namespace Spiderly.CLI
         private static bool HasArg(this string[] args, string arg)
         {
             return Array.Exists(args, a => a.Equals(arg, StringComparison.OrdinalIgnoreCase));
-        }
-
-        private static bool IsRunningFromNuget()
-        {
-            string exePath = Process.GetCurrentProcess().MainModule?.FileName;
-
-            if (string.IsNullOrEmpty(exePath))
-                return true;
-
-            return exePath.Contains(".dotnet\\tools") ||  // Windows
-                   exePath.Contains("/.dotnet/tools") ||  // Linux/macOS
-                   (
-                        !exePath.Contains("\\bin\\Debug\\") && 
-                        !exePath.Contains("/bin/Debug/") &&
-                        !exePath.Contains("\\bin\\Release\\") && 
-                        !exePath.Contains("/bin/Release/")
-                   );
         }
 
         #endregion
