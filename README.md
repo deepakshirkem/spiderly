@@ -98,29 +98,37 @@ Every contribution is appreciated and helps make this project better for everyon
 
 ### Getting Started as a Contributor
 To set up your development environment for contributing to Spiderly, follow these steps:
+
 1. **Choose a Working Directory**
    - Select a location on your local machine where you want to store the project files. For example, you might choose: `C:\Users\your-name\Documents`
-2. **Create a Directory for the Spiderly Source Code**
-   - Inside your chosen working directory, create a new directory named `Spiderly`.
-3. **Clone the Spiderly Repository**
-   - Open a terminal or Git Bash, navigate to the `Spiderly` directory you just created, and run the following command to clone the repository:
-  ```bash
-  git clone https://github.com/your-org/spiderly.git
-  ```
-4. **Create a Directory for Your Spiderly Projects**
-   - Inside your chosen working directory (e.g., `C:\Users\your-name\Documents`), create a new directory named `SpiderlyProjects`.
-5. **Generate a New App**
-   - Make sure to create the new app inside the `SpiderlyProjects` directory you just made by following the official [Spiderly Getting Started Guide](https://www.spiderly.dev/docs/getting-started).
-6. **Configure the Backend Project (Visual Studio)**
-   - Open the backend project of the app you generated in step 4 using Visual Studio.
-   - Locate all `.csproj` files.
-   - Delete any NuGet package references to Spiderly components.
-   - Uncomment the lines that reference local Spiderly projects using project references (typically `<ProjectReference>` tags).
-7. **Configure the Frontend Project (Visual Studio Code)**
-   - Open the frontend project of the app you generated in step 4 using Visual Studio Code.
-   - Locate the `tsconfig.json` file.
-   - Uncomment the 7th line that sets up the path mapping to your local Spiderly Angular library.
-   - This enables your app to reference the local version of Spiderly Angular instead of the published package.
+2. **Clone the Spiderly Repository**
+   - Open your terminal or Git Bash and run: 
+     ```bash
+     git clone https://github.com/filiptrivan/spiderly.git
+     ```
+3. **Install Angular Dependencies**
+   - Navigate to the Angular project folder:
+     ```bash
+     cd spiderly/Angular
+     ```
+   - Install the required npm packages:
+     ```bash
+     npm install
+     ```
+4. **Install the Global Spiderly CLI Tool**
+   - Run the `spiderly\Spiderly.CLI\cli-local-pack.ps1` PowerShell script.
+5. **Initialize a New Spiderly Test App in Development Mode**
+    - This step creates a new test application that will serve as a sandbox environment for testing and developing the Spiderly library. It allows you to see changes in real time as you work on the core library.
+    - Run the following command in your working directory (`C:\Users\your-name\Documents`):
+      ```bash
+      spiderly init --dev
+      ```
+6. **Finish Setting Up the Spiderly Test App**
+   - Start from step 4 of the official [Spiderly getting started guide](https://www.spiderly.dev/docs/getting-started), as the previous steps have already been completed.
+
+Any changes made to the Spiderly source code will now be reflected in your newly created Spiderly test app. You shouldn't manually build or start the Spiderly library—changes will automatically reflect in the test app each time you save a file.
+
+You’re all set! If you run into any issues during setup, feel free to [open a GitHub issue](https://github.com/filiptrivan/spiderly/issues/new). A [maintainer](https://github.com/filiptrivan) will respond as soon as possible, your feedback helps improve the experience for future contributors!
 
 #### Developing and Testing `Spiderly.CLI`
 If you want to make changes to the `Spiderly.CLI` project and test them immediately, run the PowerShell script `cli-local-pack.ps1` located in that project. You’ll need to execute this script each time you want to test your changes.
