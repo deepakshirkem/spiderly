@@ -99,14 +99,16 @@ Every contribution is appreciated and helps make this project better for everyon
 ### Getting Started as a Contributor
 To set up your development environment for contributing to Spiderly, follow these steps:
 
-1. **Choose a Working Directory**
+1. **Make Sure All Prerequisites Are Installed**
+   - You can find the full list of prerequisites in Step 1 of the official [Spiderly getting started guide](https://www.spiderly.dev/docs/getting-started). Make sure everything is installed before moving on.
+2. **Choose a Working Directory**
    - Select a location on your local machine where you want to store the project files. For example, you might choose: `C:\Users\your-name\Documents`
-2. **Clone the Spiderly Repository**
+3. **Clone the Spiderly Repository**
    - Open your terminal or Git Bash and run: 
      ```bash
      git clone https://github.com/filiptrivan/spiderly.git
      ```
-3. **Install Angular Dependencies**
+4. **Install Angular Dependencies**
    - Navigate to the Angular project folder:
      ```bash
      cd spiderly/Angular
@@ -115,15 +117,15 @@ To set up your development environment for contributing to Spiderly, follow thes
      ```bash
      npm install
      ```
-4. **Install the Global Spiderly CLI Tool**
+5. **Install the Global Spiderly CLI Tool**
    - Run the `spiderly\Spiderly.CLI\cli-local-pack.ps1` PowerShell script.
-5. **Initialize a New Spiderly Test App in Development Mode**
+6. **Initialize a New Spiderly Test App in Development Mode**
     - This step creates a new test application that will serve as a sandbox environment for testing and developing the Spiderly library. It allows you to see changes in real time as you work on the core library.
     - Run the following command in your working directory (`C:\Users\your-name\Documents`):
       ```bash
       spiderly init --dev
       ```
-6. **Finish Setting Up the Spiderly Test App**
+7. **Finish Setting Up the Spiderly Test App**
    - Start from step 4 of the official [Spiderly getting started guide](https://www.spiderly.dev/docs/getting-started), as the previous steps have already been completed.
 
 Any changes made to the Spiderly source code will now be reflected in your newly created Spiderly test app. You shouldn't manually build or start the Spiderly library—changes will automatically reflect in the test app each time you save a file.
