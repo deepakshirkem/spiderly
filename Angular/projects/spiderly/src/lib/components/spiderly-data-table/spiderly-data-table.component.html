@@ -49,7 +49,8 @@
         </tr>
       </ng-template>
       <ng-template pTemplate="body" let-rowData let-index="rowIndex" let-editing="editing">
-        <tr>
+        <tr [class.clickable-row] = "navigateOnRowClick"
+        (click)="onRowClick(rowData) ">
           <td *ngIf="selectionMode == 'multiple'">
               <p-checkbox [disabled]="readonly" (onChange)="selectRow(rowData.id, rowData.index)" [ngModel]="isRowSelected(rowData.id)" [binary]="true"></p-checkbox>
           </td>
@@ -88,7 +89,7 @@
       </ng-template>
       <ng-template pTemplate="paginatorright">
         <div style="display: flex; justify-content: end; gap: 10px;">
-          <spiderly-button *ngIf="showAddButton" [label]="t('AddNew')" icon="pi pi-plus" (onClick)="navigateToDetails(0)"></spiderly-button>
+          <spiderly-button  *ngIf="showAddButton" [label]="t('AddNew')" icon="pi pi-plus" (onClick)="navigateToDetails(0)"></spiderly-button>
         </div>
       </ng-template>
     </p-table>
