@@ -61,6 +61,22 @@ export class RegistrationComponent extends BaseFormCopy implements OnInit {
     }
 
     sendRegistrationVerificationEmail() {
+
+        /* This method is called to send a verification email during registration.
+        * It retrieves the email from the form control and emits it through the onResendVerificationToken event.
+        * It also checks the validity of the form group before proceeding.
+        * It updates the control's value if necessary.
+        * The email is sent using the authService's sendRegistrationVerificationEmail method.
+        * The form group is validated before sending the email.
+        */
+        const emailControl = this.control('email', this.registrationFormGroup) as any;
+
+        if (emailControl?._pendingValue !== undefined) {
+          emailControl.setValue(emailControl._pendingValue);
+          emailControl.markAsTouched();
+          emailControl.updateValueAndValidity();
+        } 
+
         let isFormGroupValid: boolean = this.baseFormService.checkFormGroupValidity(this.registrationFormGroup);
 
         if (isFormGroupValid == false) 

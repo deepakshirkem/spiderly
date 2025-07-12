@@ -2,7 +2,7 @@
     @if (registrationFormGroup != null) {
         @if (showEmailSentDialog == false) {
             <auth (onCompanyNameChange)="companyNameChange($event)">
-                <form [formGroup]="formGroup" style="margin-bottom: 16px;"> <!-- FT: We are not loading anything from the server here so we don't need defer block -->
+                <form [formGroup]="formGroup" (ngSubmit)="sendRegistrationVerificationEmail()" style="margin-bottom: 16px;"> <!-- FT: We are not loading anything from the server here so we don't need defer block -->
                     <div class="col-12" style="padding-left: 0; padding-right: 0;">
                         <spiderly-textbox [control]="control('email', registrationFormGroup)"></spiderly-textbox>
                     </div>
@@ -14,7 +14,7 @@
                     </div>
                     
                     <div style="display: flex; flex-direction: column; gap: 16px;">
-                        <spiderly-button [label]="t('AgreeAndJoin')" (onClick)="sendRegistrationVerificationEmail()" [outlined]="true" [style]="{width: '100%'}"></spiderly-button>
+                        <spiderly-button [label]="t('AgreeAndJoin')" (onClick)="sendRegistrationVerificationEmail()" [outlined]="true" [style]="{width: '100%'}" type="submit"></spiderly-button>
                         <!-- TODO FT: Add possibility to change this name from the specific project -->
                         <spiderly-button [label]="t('AlreadyHasAccount', {companyName: companyName})" routerLink="/login" [style]="{width: '100%'}"></spiderly-button>
                     </div>

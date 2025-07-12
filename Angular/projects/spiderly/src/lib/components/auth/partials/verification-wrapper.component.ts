@@ -54,13 +54,28 @@ export class VerificationWrapperComponent extends BaseFormCopy implements OnInit
         this.initFormGroup(this.verificationTokenRequestFormGroup, this.formGroup, model, model.typeName, []);
     }
 
-    codeSubmit(){
-        let isValid: boolean = this.baseFormService.checkFormGroupValidity(this.verificationTokenRequestFormGroup);
-    
-        if(isValid){
-            this.onCodeSubmit.next(this.verificationTokenRequestFormGroup.controls.verificationCode.getRawValue());
-        }
+    codeSubmit() {
+    /* 
+    * This method is called when the verification code is submitted.
+    * It retrieves the verification code from the form control and emits it through the onCodeSubmit event.
+    * It also checks the validity of the form group and updates the control's value if necessary.
+    * If the form is valid, it emits the verification code.
+    * */
+    const verificationCodeControl = this.control('verificationCode', this.verificationTokenRequestFormGroup) as any;
+
+    if (verificationCodeControl?._pendingValue !== undefined) {
+        verificationCodeControl.setValue(verificationCodeControl._pendingValue);
+        verificationCodeControl.markAsTouched();
+        verificationCodeControl.updateValueAndValidity();
     }
+
+    const isValid: boolean = this.baseFormService.checkFormGroupValidity(this.verificationTokenRequestFormGroup);
+
+    if (isValid) {
+        this.onCodeSubmit.next(verificationCodeControl.getRawValue());
+    }
+    }
+
 
     resendVerificationToken(){
         this.onResendVerificationToken.next(null);

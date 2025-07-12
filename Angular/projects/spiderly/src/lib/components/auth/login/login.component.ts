@@ -62,6 +62,22 @@ export class LoginComponent extends BaseFormCopy implements OnInit {
     }
 
     sendLoginVerificationEmail() {
+      /*
+      * This method is called when the user clicks the login button.
+      * It retrieves the email from the form control and sends a verification email.
+      * If the email is successfully sent, it shows a dialog indicating that the email has been sent.
+      * It also ensures that the email control is updated with the pending value if it exists.
+      * It checks the validity of the form group before proceeding with the email sending.
+      */
+     
+      const emailControl = this.control('email', this.loginFormGroup) as any;
+
+        if (emailControl?._pendingValue !== undefined) {
+          emailControl.setValue(emailControl._pendingValue);
+          emailControl.markAsTouched();
+          emailControl.updateValueAndValidity();
+        } 
+          
         let isFormGroupValid: boolean = this.baseFormService.checkFormGroupValidity(this.loginFormGroup);
         
         if (isFormGroupValid == false) 
